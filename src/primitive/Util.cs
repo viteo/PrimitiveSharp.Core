@@ -28,7 +28,7 @@ namespace primitive
 
         public static void SaveJPG(string path, Bitmap image, int quality)
         {
-            var jpegEncoder = GetEncoder(ImageFormat.Jpeg);
+            var jpegEncoder = getEncoder(ImageFormat.Jpeg);
             var jpegQualityEncoder = Encoder.Quality;
             var encoderParameters = new EncoderParameters(1);
             var encoderParameter = new EncoderParameter(jpegQualityEncoder, (byte)quality);
@@ -78,7 +78,7 @@ namespace primitive
             return x;
         }
 
-        public static int clampInt(int x, int lo, int hi)
+        public static int ClampInt(int x, int lo, int hi)
         {
             if (x < lo)
                 return lo;
@@ -87,14 +87,14 @@ namespace primitive
             return x;
         }
 
-        public static int minInt(int a, int b)
+        public static int MinInt(int a, int b)
         {
             if (a < b)
                 return a;
             return b;
         }
 
-        public static int maxInt(int a, int b)
+        public static int MaxInt(int a, int b)
         {
             if (a > b)
                 return a;
@@ -108,7 +108,7 @@ namespace primitive
             return (rx, ry);
         }
 
-        public static Bitmap imageToRGBA(Image src)
+        public static Bitmap ImageToRgba(Image src)
         {
             Bitmap clone = new Bitmap(src.Width, src.Height, PixelFormat.Format32bppRgb);
             using (Graphics gr = Graphics.FromImage(clone))
@@ -118,13 +118,13 @@ namespace primitive
             return clone;
         }
 
-        public static Bitmap copyRGBA(Bitmap src)
+        public static Bitmap CopyRgba(Bitmap src)
         {
             Bitmap clone = (Bitmap)src.Clone();
             return clone;
         }
 
-        public static Bitmap uniformRGBA(Rectangle r, Color c)
+        public static Bitmap UniformRgba(Rectangle r, Color c)
         {
             Bitmap image = new Bitmap(r.Width, r.Height);
             using (Graphics gr = Graphics.FromImage(image))
@@ -136,7 +136,7 @@ namespace primitive
 
         public static Color AverageImageColor(Image image)
         {
-            var rgba = imageToRGBA(image);
+            var rgba = ImageToRgba(image);
             Size size = rgba.Size;
             int w = size.Width;
             int h = size.Height;
@@ -145,7 +145,7 @@ namespace primitive
             {
                 for (int x = 0; x < w; x++)
                 {
-                    Color c = rgba.GetPixel(x, y);
+                    Color c = rgba.GetPixel(x, y); //lockbits needed
                     r += c.R;
                     g += c.G;
                     b += c.B;
@@ -186,7 +186,7 @@ namespace primitive
         }
 
 
-        private static ImageCodecInfo GetEncoder(ImageFormat format)
+        private static ImageCodecInfo getEncoder(ImageFormat format)
         {
             ImageCodecInfo[] codecs = ImageCodecInfo.GetImageDecoders();
             foreach (ImageCodecInfo codec in codecs)

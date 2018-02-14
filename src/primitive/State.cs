@@ -4,7 +4,7 @@ using System.Text;
 
 namespace primitive
 {
-    class Model
+    public class State
     {
     }
 }

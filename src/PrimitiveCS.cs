@@ -12,6 +12,8 @@ namespace primitive
     {
         static void Main(string[] args) => CommandLineApplication.Execute<PrimitiveCS>(args);
 
+        public static Random Rand;
+
         [Required]
         [Option(Description = "Required. Input file.",
             Template = "-i|--input")]
@@ -91,7 +93,7 @@ namespace primitive
                 Parameters.LogLevel = 2;
 
             // seed random number generator
-            Random rand = new Random((int)DateTime.Now.Ticks);
+            Rand = new Random((int)DateTime.Now.Ticks);
 
             // determine worker count
             //todo?
@@ -100,7 +102,7 @@ namespace primitive
             Logger.WriteLine(1, "reading {0}", Parameters.InputFile);
             Image inputImage;
             inputImage = Util.LoadImage(Parameters.InputFile);
-            
+
 
             // scale down input image if needed
             if (Parameters.InputResize > 0)
@@ -108,11 +110,11 @@ namespace primitive
 
             // determine background color
             Color bgColor;
-            if( Parameters.Background == "")
+            if (Parameters.Background == "")
                 bgColor = Util.AverageImageColor(inputImage);
             else
                 bgColor = ColorTranslator.FromHtml(Parameters.Background);
-            
+
 
             // run algorithm
 
@@ -122,7 +124,7 @@ namespace primitive
         }
 
     }
-    
+
     public static class Parameters
     {
         public static string InputFile;
