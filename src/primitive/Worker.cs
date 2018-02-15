@@ -49,9 +49,72 @@ namespace primitive
             //Heatmap.Add(lines);
             var color = Core.ComputeColor(Target, Current, lines, alpha);
             Core.CopyLines(Buffer, Current, lines);
-            Core.DrawLines(Buffer,color, lines);
+            Core.DrawLines(Buffer, color, lines);
             return Core.DifferencePartial(Target, Current, Buffer, Score, lines);
         }
+
+        public State BestHillClimbState(ShapeType t, int a, int n, int age, int m)
+        {
+            double bestEnergy = 0;
+            State bestState = new State();
+            for (int i = 0; i < m; i++)
+            {
+                var state = BestRandomState(t, a, n);
+                var before = state.Energy();
+                state = Optimize.HillClimb(state, age) as State;
+                var energy = state.Energy();
+                Logger.WriteLine(2, "{0}x random: {1:G6} -> {2}x hill climb: {3:G6} ", n, before, age, energy);
+                if (i == 0 || energy < bestEnergy)
+                {
+                    bestEnergy = energy;
+                    bestState = state;
+                }
+            }
+            return bestState;
+        }
+
+        public State BestRandomState(ShapeType t, int a, int n)
+        {
+            double bestEnergy = 0;
+            State bestState = new State();
+            for (int i = 0; i < n; i++)
+            {
+                var state = RandomState(t, a);
+                var energy = state.Energy();
+                if (i == 0 || energy < bestEnergy)
+                {
+                    bestEnergy = energy;
+                    bestState = state;
+                }
+            }
+            return bestState;
+        }
+
+        public State RandomState(ShapeType t, int a)
+        {
+            switch (t)
+            {
+                default:
+                    return RandomState((ShapeType)(Rnd.Next(8) + 1), a);
+                case ShapeType.ShapeTypeTriangle:
+                    return new State(this, NewRandomTriangle(this), a);
+                case ShapeType.ShapeTypeRectangle:
+                    return new State(this, NewRandomRectangle(this), a);
+                case ShapeType.ShapeTypeEllipse:
+                    return new State(this, NewRandomEllipse(this), a);
+                case ShapeType.ShapeTypeCircle:
+                    return new State(this, NewRandomCircle(this), a);
+                case ShapeType.ShapeTypeRotatedRectangle:
+                    return new State(this, NewRandomRotatedRectangle(this), a);
+                case ShapeType.ShapeTypeQuadratic:
+                    return new State(this, NewRandomQuadratic(this), a);
+                case ShapeType.ShapeTypeRotatedEllipse:
+                    return new State(this, NewRandomRotatedEllipse(this), a);
+                case ShapeType.ShapeTypePolygon:
+                    return new State(this, NewRandomPolygon(this), a);
+            }
+        }
+
 
 
     }

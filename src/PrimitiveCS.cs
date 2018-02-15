@@ -96,7 +96,8 @@ namespace primitive
             Rand = new Random((int)DateTime.Now.Ticks);
 
             // determine worker count
-            //todo?
+            if (Parameters.Workers < 1)
+                Parameters.Workers = Environment.ProcessorCount;
 
             // read input image
             Logger.WriteLine(1, "reading {0}", Parameters.InputFile);
