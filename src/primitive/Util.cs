@@ -124,9 +124,9 @@ namespace primitive
             return clone;
         }
 
-        public static Bitmap UniformRgba(Rectangle r, Color c)
+        public static Bitmap UniformRgba(int width, int height, Color c)
         {
-            Bitmap image = new Bitmap(r.Width, r.Height);
+            Bitmap image = new Bitmap(width, height);
             using (Graphics gr = Graphics.FromImage(image))
             {
                 gr.Clear(c);

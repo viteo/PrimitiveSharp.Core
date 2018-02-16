@@ -10,7 +10,7 @@ namespace primitive
         List<Scanline> Rasterize();
         IShape Copy();
         void Mutate();
-        void Draw(Bitmap context, float scale);
+        void Draw(Graphics dc, SolidBrush brush, double scale);
         string SVG(string attrs);
     }
 
