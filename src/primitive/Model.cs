@@ -55,6 +55,11 @@ namespace primitive
             ContextImage = new Bitmap(Sw, Sh);
             (Context, Brush) = NewContext(ContextImage);
 
+            Shapes = new List<IShape>();
+            Colors = new List<Color>();
+            Scores = new List<double>();
+            Workers = new List<Worker>();
+
             for (int i = 0; i < numWorkers; i++)
             {
                 var worker = new Worker(Target);
@@ -68,7 +73,7 @@ namespace primitive
             context.ScaleTransform((float)Scale, (float)Scale);
             context.TranslateTransform(0.5f, 0.5f);
             SolidBrush brush = new SolidBrush(Background);
-            context.FillRectangle(Brush, 0, 0, im.Width, im.Height);
+            context.FillRectangle(brush, 0, 0, im.Width, im.Height);
             return (context, brush);
         }
 
@@ -162,6 +167,11 @@ namespace primitive
             return counter;
         }
 
+        private State runWorker(Worker worker, ShapeType t, int a, int n, int age, int m)
+        {
+            return worker.BestHillClimbState(t, a, n, age, m);
+        }
+
         private State runWorkers(ShapeType t, int a, int n, int age, int m)
         {
             var wn = Workers.Count;
@@ -169,30 +179,50 @@ namespace primitive
             var wm = m / wn;
             if (m % wn != 0)
                 wm++;
+
+            var parameters = new List<(Worker,ShapeType,int,int,int,int)>();
+            var results = new List<State>();
+            var tasks = new List<Task>();
             for (int i = 0; i < wn; i++)
             {
                 var worker = Workers[i];
                 worker.Init(Current, Score);
-                Task.Run()
+                parameters.Add((worker, t, a, n, age, wm));
             }
-            double bestEnergy = 0;
-            State bestState = new State();
-            for (int i = 0; i < wm; i++)
+
+            #region Sequential
+            foreach(var parameter in parameters)
             {
-                State state = Task.FromResult()
-                double energy = state.Energy();
-                if (i == 0 || energy < bestEnergy)
+                results.Add(runWorker(parameter.Item1, parameter.Item2, parameter.Item3, parameter.Item4, parameter.Item5, parameter.Item6));
+            }
+            #endregion
+
+            #region Parallel
+            //parameters.ForEach((parameter) =>
+            //{
+            //    var task = Task.Factory.StartNew(() => { return runWorker(parameter.Item1,parameter.Item2,parameter.Item3,parameter.Item4,parameter.Item5,parameter.Item6); })
+            //    .ContinueWith((result) => 
+            //    {
+            //        results.Add(result.Result);
+
+            //    });
+            //    tasks.Add(task);
+            //});
+            //Task.WaitAll(tasks.ToArray());
+            #endregion
+
+            double bestEnergy = double.MaxValue;
+            State bestState = new State();
+            foreach (var res in results)
+            {
+                double energy = res.Energy();
+                if (energy < bestEnergy)
                 {
                     bestEnergy = energy;
-                    bestState = state;
+                    bestState = res;
                 }
             }
             return bestState;
-        }
-
-        private State runWorker(Worker worker, ShapeType t, int a, int n, int age, int m)
-        {
-            return worker.BestHillClimbState(t, a, n, age, m);
         }
     }
 }

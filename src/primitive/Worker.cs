@@ -96,22 +96,22 @@ namespace primitive
             {
                 default:
                     return RandomState((ShapeType)(Rnd.Next(8) + 1), a);
-                case ShapeType.ShapeTypeTriangle:
-                    return new State(this, NewRandomTriangle(this), a);
+                //case ShapeType.ShapeTypeTriangle:
+                //    return new State(this, NewRandomTriangle(this), a);
                 case ShapeType.ShapeTypeRectangle:
-                    return new State(this, NewRandomRectangle(this), a);
-                case ShapeType.ShapeTypeEllipse:
-                    return new State(this, NewRandomEllipse(this), a);
-                case ShapeType.ShapeTypeCircle:
-                    return new State(this, NewRandomCircle(this), a);
-                case ShapeType.ShapeTypeRotatedRectangle:
-                    return new State(this, NewRandomRotatedRectangle(this), a);
-                case ShapeType.ShapeTypeQuadratic:
-                    return new State(this, NewRandomQuadratic(this), a);
-                case ShapeType.ShapeTypeRotatedEllipse:
-                    return new State(this, NewRandomRotatedEllipse(this), a);
-                case ShapeType.ShapeTypePolygon:
-                    return new State(this, NewRandomPolygon(this), a);
+                    return new State(this, new RectangleStrait(this), a);
+                //case ShapeType.ShapeTypeEllipse:
+                //    return new State(this, NewRandomEllipse(this), a);
+                //case ShapeType.ShapeTypeCircle:
+                //    return new State(this, NewRandomCircle(this), a);
+                //case ShapeType.ShapeTypeRotatedRectangle:
+                //    return new State(this, new RectangleRotated(this), a);
+                //case ShapeType.ShapeTypeQuadratic:
+                //    return new State(this, NewRandomQuadratic(this), a);
+                //case ShapeType.ShapeTypeRotatedEllipse:
+                //    return new State(this, NewRandomRotatedEllipse(this), a);
+                //case ShapeType.ShapeTypePolygon:
+                //    return new State(this, NewRandomPolygon(this), a);
             }
         }
 

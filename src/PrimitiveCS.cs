@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Drawing;
 using System.Dynamic;
+using System.IO;
 using McMaster.Extensions.CommandLineUtils;
 
 namespace primitive
@@ -27,7 +28,7 @@ namespace primitive
         [Required]
         [Option(Description = "Required. Number of shapes.",
             Template = "-n|--number")]
-        public int Nprimitives { get; }
+        public string Nprimitives { get; }
 
         [Option(Description =
             "Mode: 0=combo, 1=triangle, 2=rect, 3=ellipse, 4=circle, 5=rotatedrect, 6=beziers, 7=rotatedellipse, 8=polygon",
@@ -64,22 +65,24 @@ namespace primitive
 
         [Option(Description = "Verbose output",
             Template = "-v")]
-        public bool? Verbose { get; }
+        public bool Verbose { get; }
 
         [Option(Description = "Very verbose output",
             Template = "-vv")]
-        public bool? VeryVerbose { get; }
+        public bool VeryVerbose { get; }
 
 
         private void OnExecute()
         {
             // parse and validate arguments
             Parameters.InputFile = Input;
-            //Parameters.Outputs = Output;
+            foreach (var output in Output.Split(" "))
+                Parameters.Outputs.flags.Add(output);
             Parameters.Mode = Mode ?? 1;
             Parameters.Alpha = Alpha ?? 128;
             Parameters.Repeat = Repeat ?? 0;
-            Parameters.Configs.Set(Nprimitives);
+            foreach (var nprim in Nprimitives.Split(" "))
+                Parameters.Configs.Set(nprim);
             Parameters.Nth = NthFrame ?? 1;
             Parameters.InputResize = InputResize ?? 256;
             Parameters.OutputSize = OutputSize ?? 1024;
@@ -87,9 +90,9 @@ namespace primitive
             Parameters.Workers = Workers ?? 0;
 
             // set log level
-            if (Verbose ?? false)
+            if (Verbose)
                 Parameters.LogLevel = 1;
-            if (VeryVerbose ?? false)
+            if (VeryVerbose)
                 Parameters.LogLevel = 2;
 
             // seed random number generator
@@ -118,9 +121,57 @@ namespace primitive
 
 
             // run algorithm
+            Model model = new Model(inputImage, bgColor, Parameters.OutputSize, Parameters.Workers);
+            Logger.WriteLine(1, "{0}: t={1:G3}, score={2:G6}\n", 0, 0.0, model.Score);
+            var start = DateTime.Now;
+            int frame = 0, j = 0;
 
+            foreach (var config in Parameters.Configs.Configs)
+            {
+                Logger.WriteLine(1, "count={0}, mode={1}, alpha={2}, repeat={3}\n", config.Count, config.Mode, config.Alpha, config.Repeat);
+                for (int i = 0; i < config.Count; i++)
+                {
+                    frame++;
 
+                    // find optimal shape and add it to the model
+                    var t = DateTime.Now;
+                    var n = model.Step((ShapeType)config.Mode, config.Alpha, config.Repeat);
+                    var nps = Util.NumberString((double)n / (DateTime.Now - t).Seconds);
+                    var elapsed = (DateTime.Now - start).Seconds;
+                    Logger.WriteLine(1, "{0}: t={1:G3}, score={2:G6}, n={3}, n/s={4}\n", frame, elapsed, model.Score, n, nps);
 
+                    // write output image(s)
+                    foreach (var output in Parameters.Outputs.flags)
+                    {
+                        var ext = Path.GetExtension(output).ToLower();
+                        var percent = output.Contains("%");
+                        var saveFrames = percent && ext.Equals(".gif");
+                        saveFrames = saveFrames && frame % Parameters.Nth == 0;
+                        var last = j == Parameters.Configs.Configs.Count - 1 && i == config.Count - 1;
+                        if (saveFrames || last)
+                        {
+                            var path = output;
+                            if (percent)
+                                path = String.Format(output, frame);
+                            Logger.WriteLine(1, "writing {0}\n", path);
+                            switch (ext)
+                            {
+                                case ".png":
+                                    Util.SavePNG(path, model.ContextImage); break;
+                                case ".jpg": case ".jpeg":
+                                    Util.SaveJPG(path, model.ContextImage, 95); break;
+                                case ".svg":
+                                    Util.SaveFile(path, model.SVG()); break;
+                                case ".gif":
+                                    var frames = model.Frames(0.001);
+                                    Util.SaveGIFImageMagick(path, frames.ToArray(), 50, 250); break;
+                                default:
+                                    throw new Exception("unrecognized file extension: " + ext);
+                            }
+                        }
+                    }
+                }
+            }
             Console.WriteLine("End");
         }
 
@@ -129,8 +180,8 @@ namespace primitive
     public static class Parameters
     {
         public static string InputFile;
-        public static FlagArray Outputs;
-        public static ShapeConfigArray Configs;
+        public static FlagArray Outputs = new FlagArray();
+        public static ShapeConfigArray Configs = new ShapeConfigArray();
         public static int Mode;
         public static int Alpha;
         public static int Repeat;
@@ -160,7 +211,7 @@ namespace primitive
 
     public class ShapeConfigArray
     {
-        public List<shapeConfig> Configs;
+        public List<shapeConfig> Configs = new List<shapeConfig>();
 
         public override string ToString()
         {
@@ -170,8 +221,7 @@ namespace primitive
         public void Set(string value)
         {
             int n = Int32.Parse(value);
-            shapeConfig config = new shapeConfig(n, Parameters.Mode, Parameters.Alpha, Parameters.Repeat);
-            Configs.Add(config);
+            Set(n);
         }
 
         public void Set(int value)
@@ -184,16 +234,16 @@ namespace primitive
 
     public class FlagArray
     {
-        public List<string> flags;
+        public List<string> flags = new List<string>();
 
         public override string ToString()
         {
             return string.Join(", ", flags);
         }
 
-        public void Set(string flag)
+        public void Set(string value)
         {
-            flags.Add(flag);
+            flags.Add(value);
         }
     }
 }

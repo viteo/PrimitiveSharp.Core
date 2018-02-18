@@ -79,7 +79,7 @@ namespace primitive
             {
                 int a = pixOffset(line.X1, line.Y, dataDst.Stride);
                 int b = a + (line.X2 - line.X1 + 1) * 4;
-                Array.Copy(rgbaSrc, a, rgbaDst, a, b - a);
+                Array.Copy(rgbaSrc, a, rgbaDst, a, Math.Abs(b - a));
             }
 
             Marshal.Copy(rgbaDst, 0, dataDst.Scan0, numBytesDst);
