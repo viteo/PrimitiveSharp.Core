@@ -23,7 +23,7 @@ namespace primitive
         [Required]
         [Option(Description = "Required. Output file.",
             Template = "-o|--output")]
-        public string Output { get; }
+        public string OutputFiles { get; }
 
         [Required]
         [Option(Description = "Required. Number of shapes.",
@@ -76,13 +76,13 @@ namespace primitive
         {
             // parse and validate arguments
             Parameters.InputFile = Input;
-            foreach (var output in Output.Split(" "))
-                Parameters.Outputs.flags.Add(output);
+            foreach (var output in OutputFiles.Split(" "))
+                Parameters.OutputFiles.FileList.Add(output);
             Parameters.Mode = Mode ?? 1;
             Parameters.Alpha = Alpha ?? 128;
             Parameters.Repeat = Repeat ?? 0;
             foreach (var nprim in Nprimitives.Split(" "))
-                Parameters.Configs.Set(nprim);
+                Parameters.ShapeConfigs.Set(nprim);
             Parameters.Nth = NthFrame ?? 1;
             Parameters.InputResize = InputResize ?? 256;
             Parameters.OutputSize = OutputSize ?? 1024;
@@ -126,33 +126,33 @@ namespace primitive
             var start = DateTime.Now;
             int frame = 0, j = 0;
 
-            foreach (var config in Parameters.Configs.Configs)
+            foreach (var shapeConfig in Parameters.ShapeConfigs.ConfigList)
             {
-                Logger.WriteLine(1, "count={0}, mode={1}, alpha={2}, repeat={3}\n", config.Count, config.Mode, config.Alpha, config.Repeat);
-                for (int i = 0; i < config.Count; i++)
+                Logger.WriteLine(1, "count={0}, mode={1}, alpha={2}, repeat={3}\n", shapeConfig.Count, shapeConfig.Mode, shapeConfig.Alpha, shapeConfig.Repeat);
+                for (int i = 0; i < shapeConfig.Count; i++)
                 {
                     frame++;
 
                     // find optimal shape and add it to the model
                     var t = DateTime.Now;
-                    var n = model.Step((ShapeType)config.Mode, config.Alpha, config.Repeat);
+                    var n = model.Step((ShapeType)shapeConfig.Mode, shapeConfig.Alpha, shapeConfig.Repeat);
                     var nps = Util.NumberString((double)n / (DateTime.Now - t).Seconds);
                     var elapsed = (DateTime.Now - start).Seconds;
                     Logger.WriteLine(1, "{0}: t={1:G3}, score={2:G6}, n={3}, n/s={4}\n", frame, elapsed, model.Score, n, nps);
 
                     // write output image(s)
-                    foreach (var output in Parameters.Outputs.flags)
+                    foreach (var outFile in Parameters.OutputFiles.FileList)
                     {
-                        var ext = Path.GetExtension(output).ToLower();
-                        var percent = output.Contains("%");
+                        var ext = Path.GetExtension(outFile).ToLower();
+                        var percent = outFile.Contains("%");
                         var saveFrames = percent && ext.Equals(".gif");
                         saveFrames = saveFrames && frame % Parameters.Nth == 0;
-                        var last = j == Parameters.Configs.Configs.Count - 1 && i == config.Count - 1;
+                        var last = j == Parameters.ShapeConfigs.ConfigList.Count - 1 && i == shapeConfig.Count - 1;
                         if (saveFrames || last)
                         {
-                            var path = output;
+                            var path = outFile;
                             if (percent)
-                                path = String.Format(output, frame);
+                                path = String.Format(outFile, frame);
                             Logger.WriteLine(1, "writing {0}\n", path);
                             switch (ext)
                             {
@@ -180,8 +180,8 @@ namespace primitive
     public static class Parameters
     {
         public static string InputFile;
-        public static FlagArray Outputs = new FlagArray();
-        public static ShapeConfigArray Configs = new ShapeConfigArray();
+        public static OutputFileArray OutputFiles = new OutputFileArray();
+        public static ShapeConfigArray ShapeConfigs = new ShapeConfigArray();
         public static int Mode;
         public static int Alpha;
         public static int Repeat;
@@ -195,10 +195,10 @@ namespace primitive
 
     public struct shapeConfig
     {
-        public int Count;
-        public int Mode;
-        public int Alpha;
-        public int Repeat;
+        public int Count { get; set; }
+        public int Mode { get; set; }
+        public int Alpha { get; set; }
+        public int Repeat { get; set; }
 
         public shapeConfig(int count, int mode, int alpha, int repeat)
         {
@@ -211,7 +211,7 @@ namespace primitive
 
     public class ShapeConfigArray
     {
-        public List<shapeConfig> Configs = new List<shapeConfig>();
+        public List<shapeConfig> ConfigList = new List<shapeConfig>();
 
         public override string ToString()
         {
@@ -228,22 +228,23 @@ namespace primitive
         {
             int n = value;
             shapeConfig config = new shapeConfig(n, Parameters.Mode, Parameters.Alpha, Parameters.Repeat);
-            Configs.Add(config);
+            ConfigList.Add(config);
         }
     }
 
-    public class FlagArray
+    //FlagArray
+    public class OutputFileArray
     {
-        public List<string> flags = new List<string>();
+        public List<string> FileList = new List<string>();
 
         public override string ToString()
         {
-            return string.Join(", ", flags);
+            return string.Join(", ", FileList);
         }
 
         public void Set(string value)
         {
-            flags.Add(value);
+            FileList.Add(value);
         }
     }
 }
