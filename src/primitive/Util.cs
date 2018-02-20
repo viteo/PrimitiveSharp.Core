@@ -154,7 +154,7 @@ namespace primitive
             r /= w * h;
             g /= w * h;
             b /= w * h;
-            Color result = Color.FromArgb(r, g, b, 255);
+            Color result = Color.FromArgb(255, r, g, b);
             return result;
         }
 

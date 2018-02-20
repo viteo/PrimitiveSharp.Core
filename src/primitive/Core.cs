@@ -91,11 +91,22 @@ namespace primitive
         public static void DrawLines(Bitmap im, Color c, List<Scanline> lines)
         {
             const int m = 0xffff;
-            uint sr = c.R;
-            uint sg = c.G;
-            uint sb = c.B;
-            uint sa = c.A;
 
+            uint sr = (uint)c.R;
+            sr |= sr << 8;
+            sr *= (uint)(c.A);
+            sr /= 0xff;
+            uint sg = (uint)(c.G);
+            sg |= sg << 8;
+            sg *= (uint)(c.A);
+            sg /= 0xff;
+            uint sb = (uint)(c.B);
+            sb |= sb << 8;
+            sb *= (uint)(c.A);
+            sb /= 0xff;
+            uint sa = (uint)(c.A);
+            sa |= sa << 8;
+            
             var dataIm = im.LockBits(
                 new Rectangle(0, 0, im.Width, im.Height),
                 ImageLockMode.ReadWrite, im.PixelFormat);
@@ -159,10 +170,10 @@ namespace primitive
                     int ag = (int)rgbaA[i + 1];
                     int ab = (int)rgbaA[i + 2];
                     int aa = (int)rgbaA[i + 3];
-                    int br = (int)rgbaA[i];
-                    int bg = (int)rgbaA[i + 1];
-                    int bb = (int)rgbaA[i + 2];
-                    int ba = (int)rgbaA[i + 3];
+                    int br = (int)rgbaB[i];
+                    int bg = (int)rgbaB[i + 1];
+                    int bb = (int)rgbaB[i + 2];
+                    int ba = (int)rgbaB[i + 3];
                     i += 4;
                     var dr = ar - br;
                     var dg = ag - bg;

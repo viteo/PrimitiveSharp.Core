@@ -17,11 +17,10 @@ namespace primitive
         public RectangleStrait(Worker worker)
         {
             var rnd = worker.Rnd;
-            int X1 = rnd.Next(worker.W);
-            int Y1 = rnd.Next(worker.H);
-            int X2 = Util.ClampInt(X1 + rnd.Next(32) + 1, 0, worker.W - 1);
-            int Y2 = Util.ClampInt(Y1 + rnd.Next(32) + 1, 0, worker.H - 1);
-            CheckBounds();
+            X1 = rnd.Next(worker.W);
+            Y1 = rnd.Next(worker.H);
+            X2 = Util.ClampInt(X1 + rnd.Next(32) + 1, 0, worker.W - 1);
+            Y2 = Util.ClampInt(Y1 + rnd.Next(32) + 1, 0, worker.H - 1);
             Worker = worker;
         }
 
@@ -104,6 +103,7 @@ namespace primitive
             Sx = rnd.Next(32) + 1;
             Sy = rnd.Next(32) + 1;
             Angle = rnd.Next(360);
+            Worker = worker;
             Mutate();
         }
 
@@ -193,12 +193,12 @@ namespace primitive
             var xs = new int[] { x1, x2, x3, x4, x1 };
             var ys = new int[] { y1, y2, y3, y4, y1 };
             // TODO: this could be better probably
-            for(int i =0; i<4;i++)
+            for (int i = 0; i < 4; i++)
             {
                 double x = xs[i], y = ys[i];
                 double dx = xs[i + 1] - xs[i], dy = ys[i + 1] - ys[i];
                 int count = (int)(Math.Sqrt(dx * dx + dy * dy)) * 2;
-                for(int j =0; j<count; j++)
+                for (int j = 0; j < count; j++)
                 {
                     double t = j / (double)(count - 1);
                     int xi = (int)(x + dx * t);
@@ -208,7 +208,7 @@ namespace primitive
                 }
             }
             var lines = new List<Scanline>();
-            for(int i = 0; i< n; i++)
+            for (int i = 0; i < n; i++)
             {
                 var y = miny + i;
                 if (y < 0 || y >= h)
