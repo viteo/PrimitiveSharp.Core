@@ -76,12 +76,12 @@ namespace primitive
         {
             // parse and validate arguments
             Parameters.InputFile = Input;
-            foreach (var output in OutputFiles.Split(" "))
+            foreach (var output in OutputFiles.Split(' '))
                 Parameters.OutputFiles.FileList.Add(output);
             Parameters.Mode = Mode ?? 1;
             Parameters.Alpha = Alpha ?? 128;
             Parameters.Repeat = Repeat ?? 0;
-            foreach (var nprim in Nprimitives.Split(" "))
+            foreach (var nprim in Nprimitives.Split(' '))
                 Parameters.ShapeConfigs.Set(nprim);
             Parameters.Nth = NthFrame ?? 1;
             Parameters.InputResize = InputResize ?? 256;
@@ -157,9 +157,9 @@ namespace primitive
                             switch (ext)
                             {
                                 case ".png":
-                                    Util.SavePNG(path, model.ContextImage); break;
+                                    Util.SavePNG(path, model.Current); break;
                                 case ".jpg": case ".jpeg":
-                                    Util.SaveJPG(path, model.ContextImage, 95); break;
+                                    Util.SaveJPG(path, model.Current, 95); break;
                                 case ".svg":
                                     Util.SaveFile(path, model.SVG()); break;
                                 case ".gif":

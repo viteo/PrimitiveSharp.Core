@@ -16,7 +16,6 @@ namespace primitive
         public Color Background { get; set; }
         public Bitmap Target { get; set; }
         public Bitmap Current { get; set; }
-        public Bitmap ContextImage { get; set; }
         public Graphics Context { get; set; }
         public SolidBrush Brush { get; set; }
         public double Score { get; set; }
@@ -52,8 +51,7 @@ namespace primitive
             Target = Util.ImageToRgba(target);
             Current = Util.UniformRgba(target.Width, target.Height, background);
             Score = Core.DifferenceFull(Target, Current);
-            ContextImage = new Bitmap(Sw, Sh);
-            (Context, Brush) = NewContext(ContextImage);
+            (Context, Brush) = NewContext(Current);
 
             Shapes = new List<IShape>();
             Colors = new List<Color>();
@@ -120,7 +118,7 @@ namespace primitive
             lines.Add("</g>");
             lines.Add("</svg>");
             lines.Add("\n");
-            return String.Join('\n', lines);
+            return String.Join("\n", lines);
         }
 
         public void Add(IShape shape, int alpha)
