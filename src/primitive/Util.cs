@@ -162,6 +162,8 @@ namespace primitive
         {
             int width, height;
             int size = Parameters.InputResize;
+            if (size >= image.Width && size >= image.Height)
+                return image;
             if (image.Width > image.Height)
             {
                 width = size;

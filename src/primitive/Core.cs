@@ -164,7 +164,7 @@ namespace primitive
             for (int y = 0; y < h; y++)
             {
                 var i = pixOffset(0, y, stride);
-                for (int x = 0; i < w; x++)
+                for (int x = 0; x < w; x++)
                 {
                     int ar = (int)rgbaA[i];
                     int ag = (int)rgbaA[i + 1];
@@ -182,15 +182,14 @@ namespace primitive
                     total += (ulong)(dr * dr + dg * dg + db * db + da * da);
                 }
             }
-
-            return Math.Sqrt((double)total / (double)(w * h * 4)) / 255;
+            return Math.Sqrt((double)total / (double)(w * h * 4)) / 255; ;
         }
 
         public static double DifferencePartial(Bitmap target, Bitmap before, Bitmap after, double score, List<Scanline> lines)
         {
             int w = target.Width;
             int h = target.Height;
-            ulong total = (ulong)(Math.Pow(score * 255, 2) * (double)(w * h * 4));
+            var total = (ulong)(Math.Pow(score * 255, 2) * (double)(w * h * 4));
 
             var dataTarget = target.LockBits(
                 new Rectangle(0, 0, target.Width, target.Height),

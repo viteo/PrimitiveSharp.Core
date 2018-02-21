@@ -5,7 +5,7 @@ using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace primitive.primitive
+namespace primitive
 {
     public class Heatmap
     {
