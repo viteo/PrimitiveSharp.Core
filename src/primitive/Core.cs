@@ -36,12 +36,12 @@ namespace primitive
                 int i = pixOffset(line.X1, line.Y, stride);
                 for (int x = line.X1; x <= line.X2; x++)
                 {
-                    var tr = (int)rgbaTarget[i];
+                    var tb = (int)rgbaTarget[i];
                     var tg = (int)rgbaTarget[i + 1];
-                    var tb = (int)rgbaTarget[i + 2];
-                    var cr = (int)rgbaCurrent[i];
+                    var tr = (int)rgbaTarget[i + 2];
+                    var cb = (int)rgbaCurrent[i];
                     var cg = (int)rgbaCurrent[i + 1];
-                    var cb = (int)rgbaCurrent[i + 2];
+                    var cr = (int)rgbaCurrent[i + 2];
                     i += 4;
                     rsum += (long)((tr - cr) * a + cr * 0x101);
                     gsum += (long)((tg - cg) * a + cg * 0x101);
@@ -57,7 +57,7 @@ namespace primitive
             var g = Util.ClampInt((int)(gsum / count) >> 8, 0, 255);
             var b = Util.ClampInt((int)(bsum / count) >> 8, 0, 255);
 
-            return Color.FromArgb(r, g, b);
+            return Color.FromArgb(alpha, r, g, b);
         }
 
         public static void CopyLines(Bitmap dst, Bitmap src, List<Scanline> lines)
@@ -122,9 +122,9 @@ namespace primitive
                 var i = pixOffset(line.X1, line.Y, dataIm.Stride);
                 for (int x = line.X1; x <= line.X2; x++)
                 {
-                    var dr = (uint)(rgbaIm[i + 0]);
+                    var db = (uint)(rgbaIm[i + 0]);
                     var dg = (uint)(rgbaIm[i + 1]);
-                    var db = (uint)(rgbaIm[i + 2]);
+                    var dr = (uint)(rgbaIm[i + 2]);
                     var da = (uint)(rgbaIm[i + 3]);
                     rgbaIm[i + 0] = (byte)((dr * a + sr * ma) / m >> 8);
                     rgbaIm[i + 1] = (byte)((dg * a + sg * ma) / m >> 8);
@@ -166,13 +166,13 @@ namespace primitive
                 var i = pixOffset(0, y, stride);
                 for (int x = 0; x < w; x++)
                 {
-                    int ar = (int)rgbaA[i];
+                    int ab = (int)rgbaA[i];
                     int ag = (int)rgbaA[i + 1];
-                    int ab = (int)rgbaA[i + 2];
+                    int ar = (int)rgbaA[i + 2];
                     int aa = (int)rgbaA[i + 3];
-                    int br = (int)rgbaB[i];
+                    int bb = (int)rgbaB[i];
                     int bg = (int)rgbaB[i + 1];
-                    int bb = (int)rgbaB[i + 2];
+                    int br = (int)rgbaB[i + 2];
                     int ba = (int)rgbaB[i + 3];
                     i += 4;
                     var dr = ar - br;
@@ -219,17 +219,17 @@ namespace primitive
                 int i = pixOffset(line.X1, line.Y, stride);
                 for (int x = line.X1; x <= line.X2; x++)
                 {
-                    int tr = rgbaTarget[i];
+                    int tb = rgbaTarget[i];
                     int tg = rgbaTarget[i + 1];
-                    int tb = rgbaTarget[i + 2];
+                    int tr = rgbaTarget[i + 2];
                     int ta = rgbaTarget[i + 3];
-                    int br = rgbaBefore[i];
+                    int bb = rgbaBefore[i];
                     int bg = rgbaBefore[i + 1];
-                    int bb = rgbaBefore[i + 2];
+                    int br = rgbaBefore[i + 2];
                     int ba = rgbaBefore[i + 3];
-                    int ar = rgbaAfter[i];
+                    int ab = rgbaAfter[i];
                     int ag = rgbaAfter[i + 1];
-                    int ab = rgbaAfter[i + 2];
+                    int ar = rgbaAfter[i + 2];
                     int aa = rgbaAfter[i + 3];
                     i += 4;
                     var dr1 = tr - br;

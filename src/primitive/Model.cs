@@ -24,7 +24,7 @@ namespace primitive
         public List<double> Scores { get; set; }
         public List<Worker> Workers { get; set; }
 
-        public Model(Image target, Color background, int size, int numWorkers)
+        public Model(Image target, Color background, int outSize, int numWorkers)
         {
             var w = target.Width;
             var h = target.Height;
@@ -33,15 +33,15 @@ namespace primitive
             double scale = 0;
             if (aspect >= 1)
             {
-                sw = size;
-                sh = (int)((double)size / aspect);
-                scale = (double)size / (double)w;
+                sw = outSize;
+                sh = (int)((double)outSize / aspect);
+                scale = (double)outSize / (double)w;
             }
             else
             {
-                sw = (int)((double)size * aspect);
-                sh = size;
-                scale = (double)size / (double)h;
+                sw = (int)((double)outSize * aspect);
+                sh = outSize;
+                scale = (double)outSize / (double)h;
             }
 
             Sw = sw;
