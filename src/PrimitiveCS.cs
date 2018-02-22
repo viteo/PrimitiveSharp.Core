@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Dynamic;
 using System.IO;
 using McMaster.Extensions.CommandLineUtils;
+using SixLabors.ImageSharp;
 
 namespace primitive
 {
@@ -104,7 +105,7 @@ namespace primitive
 
             // read input image
             Logger.WriteLine(1, "reading {0}", Parameters.InputFile);
-            Bitmap inputImage;
+            Image<Rgba32> inputImage;
             inputImage = Util.LoadImage(Parameters.InputFile);
 
 
