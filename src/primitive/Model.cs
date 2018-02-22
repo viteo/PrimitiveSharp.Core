@@ -24,7 +24,7 @@ namespace primitive
         public List<double> Scores { get; set; }
         public List<Worker> Workers { get; set; }
 
-        public Model(Image target, Color background, int outSize, int numWorkers)
+        public Model(Bitmap target, Color background, int outSize, int numWorkers)
         {
             var w = target.Width;
             var h = target.Height;

@@ -5,14 +5,15 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace primitive
 {
     public static class Util
     {
-        public static Image LoadImage(string path)
+        public static Bitmap LoadImage(string path)
         {
-            Image image = Image.FromFile(path);
+            Bitmap image = new Bitmap(path);
             return image;
         }
 
@@ -108,13 +109,13 @@ namespace primitive
             return (rx, ry);
         }
 
-        public static Bitmap ImageToRgba(Image src)
+        public static Bitmap ImageToRgba(Bitmap src)
         {
-            Bitmap clone = new Bitmap(src.Width, src.Height, PixelFormat.Format32bppRgb);
-            using (Graphics gr = Graphics.FromImage(clone))
-            {
-                gr.DrawImage(src, new Rectangle(0, 0, clone.Width, clone.Height));
-            }
+            Bitmap clone = src.Clone(new Rectangle(0, 0, src.Width, src.Height), PixelFormat.Format32bppRgb);
+            //using (Graphics gr = Graphics.FromImage(clone))
+            //{
+            //    gr.DrawImage(src, new Rectangle(0, 0, clone.Width, clone.Height));
+            //}
             return clone;
         }
 
@@ -134,22 +135,27 @@ namespace primitive
             return image;
         }
 
-        public static Color AverageImageColor(Image image)
+        public static Color AverageImageColor(Bitmap image)
         {
             var rgba = ImageToRgba(image);
             Size size = rgba.Size;
             int w = size.Width;
             int h = size.Height;
             int r = 0, g = 0, b = 0;
-            for (int y = 0; y < h; y++)
+
+            var rgbaData = rgba.LockBits(
+                new Rectangle(0, 0, rgba.Width, rgba.Height),
+                ImageLockMode.ReadWrite, rgba.PixelFormat);
+            int numBytes = rgbaData.Stride * rgba.Height;
+            byte[] rgbaBytes = new byte[numBytes];
+            Marshal.Copy(rgbaData.Scan0, rgbaBytes, 0, numBytes);
+            rgba.UnlockBits(rgbaData);
+
+            for (int i = 0; i < rgbaBytes.Length; i += 4)
             {
-                for (int x = 0; x < w; x++)
-                {
-                    Color c = rgba.GetPixel(x, y); //lockbits needed
-                    r += c.R;
-                    g += c.G;
-                    b += c.B;
-                }
+                b += rgbaBytes[i]-1;
+                g += rgbaBytes[i + 1]-1;
+                r += rgbaBytes[i + 2]-1;
             }
             r /= w * h;
             g /= w * h;
@@ -158,7 +164,7 @@ namespace primitive
             return result;
         }
 
-        public static Image Resize(Image image)
+        public static Bitmap Resize(Bitmap image)
         {
             int width, height;
             int size = Parameters.InputResize;
@@ -175,7 +181,7 @@ namespace primitive
                 height = size;
             }
 
-            Image resized = new Bitmap(width, height);
+            Bitmap resized = new Bitmap(width, height);
             using (var graphics = Graphics.FromImage(resized))
             {
                 graphics.CompositingQuality = CompositingQuality.HighSpeed;

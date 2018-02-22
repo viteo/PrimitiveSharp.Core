@@ -104,7 +104,7 @@ namespace primitive
 
             // read input image
             Logger.WriteLine(1, "reading {0}", Parameters.InputFile);
-            Image inputImage;
+            Bitmap inputImage;
             inputImage = Util.LoadImage(Parameters.InputFile);
 
 

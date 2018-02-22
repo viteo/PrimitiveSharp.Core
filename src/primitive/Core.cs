@@ -126,9 +126,9 @@ namespace primitive
                     var dg = (uint)(rgbaIm[i + 1]);
                     var dr = (uint)(rgbaIm[i + 2]);
                     var da = (uint)(rgbaIm[i + 3]);
-                    rgbaIm[i + 0] = (byte)((dr * a + sr * ma) / m >> 8);
+                    rgbaIm[i + 0] = (byte)((db * a + sb * ma) / m >> 8);
                     rgbaIm[i + 1] = (byte)((dg * a + sg * ma) / m >> 8);
-                    rgbaIm[i + 2] = (byte)((db * a + sb * ma) / m >> 8);
+                    rgbaIm[i + 2] = (byte)((dr * a + sr * ma) / m >> 8);
                     rgbaIm[i + 3] = (byte)((da * a + sa * ma) / m >> 8);
                     i += 4;
                 }
