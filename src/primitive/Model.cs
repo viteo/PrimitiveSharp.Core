@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using SixLabors.ImageSharp;
 
 namespace primitive
 {
@@ -13,18 +13,16 @@ namespace primitive
         public int Sw { get; set; }
         public int Sh { get; set; }
         public double Scale { get; set; }
-        public Color Background { get; set; }
-        public Bitmap Target { get; set; }
-        public Bitmap Current { get; set; }
-        public Graphics Context { get; set; }
-        public SolidBrush Brush { get; set; }
+        public Rgba32 Background { get; set; }
+        public Image<Rgba32> Target { get; set; }
+        public Image<Rgba32> Current { get; set; }
         public double Score { get; set; }
         public List<IShape> Shapes { get; set; }
-        public List<Color> Colors { get; set; }
+        public List<Rgba32> Colors { get; set; }
         public List<double> Scores { get; set; }
         public List<Worker> Workers { get; set; }
 
-        public Model(Bitmap target, Color background, int outSize, int numWorkers)
+        public Model(Image<Rgba32> target, Rgba32 background, int outSize, int numWorkers)
         {
             var w = target.Width;
             var h = target.Height;
@@ -48,13 +46,11 @@ namespace primitive
             Sh = sh;
             Scale = scale;
             Background = background;
-            Target = Util.ImageToRgba(target);
+            Target = target.Clone();
             Current = Util.UniformRgba(target.Width, target.Height, background);
             Score = Core.DifferenceFull(Target, Current);
-            (Context, Brush) = NewContext(Current);
-
             Shapes = new List<IShape>();
-            Colors = new List<Color>();
+            Colors = new List<Rgba32>();
             Scores = new List<double>();
             Workers = new List<Worker>();
 
@@ -65,36 +61,22 @@ namespace primitive
             }
         }
 
-        private (Graphics, SolidBrush) NewContext(Bitmap im)
+        public List<Image<Rgba32>> Frames(double scoreDelta)
         {
-            Graphics context = Graphics.FromImage(im);
-            context.ScaleTransform((float)Scale, (float)Scale);
-            context.TranslateTransform(0.5f, 0.5f);
-            SolidBrush brush = new SolidBrush(Background);
-            context.FillRectangle(brush, 0, 0, im.Width, im.Height);
-            return (context, brush);
-        }
-
-        public List<Bitmap> Frames(double scoreDelta)
-        {
-            List<Bitmap> result = new List<Bitmap>();
-            Bitmap im = new Bitmap(Sw, Sh);
-            Graphics dc;
-            SolidBrush dcBrush;
-            (dc, dcBrush) = NewContext(im);
-            result.Add(Util.ImageToRgba(im));
+            List<Image<Rgba32>> result = new List<Image<Rgba32>>();
+            Image<Rgba32> im = new Image<Rgba32>(Sw, Sh);
+            result.Add(im.Clone());
             double previous = 10;
             for (int i = 0; i < Shapes.Count; i++)
             {
-                Color c = Colors[i];
-                dcBrush.Color = c;
-                Shapes[i].Draw(dc, dcBrush, Scale);
+                Rgba32 c = Colors[i];
+                Shapes[i].Draw(im, c, Scale);
                 var score = Scores[i];
                 var delta = previous - score;
                 if (delta >= scoreDelta)
                 {
                     previous = score;
-                    result.Add(Util.ImageToRgba(im));
+                    result.Add(im.Clone());
                 }
 
             }
@@ -103,14 +85,14 @@ namespace primitive
 
         public string SVG()
         {
-            Color bg = Background;
+            Rgba32 bg = Background;
             List<string> lines = new List<string>();
             lines.Add(String.Format("<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"{0}\" height=\"{1}\">", Sw, Sh));
             lines.Add(String.Format("<rect x=\"0\" y=\"0\" width=\"{0}\" height=\"{1}\" fill=\"#{2:X}{3:X}{4:X}\" />", Sw, Sh, bg.R, bg.G, bg.B));
             lines.Add(String.Format("<g transform=\"scale({0}) translate(0.5 0.5)\">", Scale));
             for (int i = 0; i < Shapes.Count; i++)
             {
-                Color c = Colors[i];
+                Rgba32 c = Colors[i];
                 string attrs = "fill=\"#{0:X}{1:X}{2:X}\" fill-opacity=\"{3}\"";
                 attrs = String.Format(attrs, c.R, c.G, c.B, (double)c.A / 255);
                 lines.Add(Shapes[i].SVG(attrs));
@@ -123,7 +105,7 @@ namespace primitive
 
         public void Add(IShape shape, int alpha)
         {
-            var before = Util.CopyRgba(Current);
+            var before = Current.Clone();
             var lines = shape.Rasterize();
             var color = Core.ComputeColor(Target, Current, lines, alpha);
             Core.DrawLines(Current, color, lines);
@@ -134,8 +116,7 @@ namespace primitive
             Colors.Add(color);
             Scores.Add(score);
 
-            Brush.Color = color;
-            shape.Draw(Context, Brush, Scale);
+            shape.Draw(Current, color, Scale);
         }
 
         public int Step(ShapeType shapeType, int alpha, int repeat)
@@ -189,24 +170,24 @@ namespace primitive
             }
 
             #region Sequential
-            foreach(var parameter in parameters)
-            {
-                results.Add(runWorker(parameter.Item1, parameter.Item2, parameter.Item3, parameter.Item4, parameter.Item5, parameter.Item6));
-            }
+            //foreach(var parameter in parameters)
+            //{
+            //    results.Add(runWorker(parameter.Item1, parameter.Item2, parameter.Item3, parameter.Item4, parameter.Item5, parameter.Item6));
+            //}
             #endregion
 
             #region Parallel
-            //parameters.ForEach((parameter) =>
-            //{
-            //    var task = Task.Factory.StartNew(() => { return runWorker(parameter.Item1,parameter.Item2,parameter.Item3,parameter.Item4,parameter.Item5,parameter.Item6); })
-            //    .ContinueWith((result) => 
-            //    {
-            //        results.Add(result.Result);
+            parameters.ForEach((parameter) =>
+            {
+                var task = Task.Factory.StartNew(() => { return runWorker(parameter.Item1, parameter.Item2, parameter.Item3, parameter.Item4, parameter.Item5, parameter.Item6); })
+                .ContinueWith((result) =>
+                {
+                    results.Add(result.Result);
 
-            //    });
-            //    tasks.Add(task);
-            //});
-            //Task.WaitAll(tasks.ToArray());
+                });
+                tasks.Add(task);
+            });
+            Task.WaitAll(tasks.ToArray());
             #endregion
 
             double bestEnergy = double.MaxValue;

@@ -1,19 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Drawing;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.Primitives;
+
 
 namespace primitive
 {
     public static class Util
     {
-        public static Bitmap LoadImage(string path)
+        public static Image<Rgba32> LoadImage(string path)
         {
-            Bitmap image = new Bitmap(path);
+            Image<Rgba32> image = Image.Load(path);
             return image;
         }
 
@@ -22,28 +24,22 @@ namespace primitive
             File.WriteAllText(path, contents);
         }
 
-        public static void SavePNG(string path, Bitmap image)
+        public static void SavePNG(string path, Image<Rgba32> image)
         {
-            image.Save(path, ImageFormat.Png);
+            image.Save(path);
         }
 
-        public static void SaveJPG(string path, Bitmap image, int quality)
+        public static void SaveJPG(string path, Image<Rgba32> image, int quality)
         {
-            var jpegEncoder = getEncoder(ImageFormat.Jpeg);
-            var jpegQualityEncoder = Encoder.Quality;
-            var encoderParameters = new EncoderParameters(1);
-            var encoderParameter = new EncoderParameter(jpegQualityEncoder, (byte)quality);
-            encoderParameters.Param[0] = encoderParameter;
-
-            image.Save(path, jpegEncoder, encoderParameters);
+            image.Save(path);
         }
 
-        public static void SaveGIF(string path, Bitmap[] frames, int delay, int lastDelay)
+        public static void SaveGIF(string path, List<Image<Rgba32>> frames, int delay, int lastDelay)
         {
             throw new NotImplementedException();
         }
 
-        public static void SaveGIFImageMagick(string path, Bitmap[] frames, int delay, int lastDelay)
+        public static void SaveGIFImageMagick(string path, List<Image<Rgba32>> frames, int delay, int lastDelay)
         {
             throw new NotImplementedException();
         }
@@ -109,62 +105,35 @@ namespace primitive
             return (rx, ry);
         }
 
-        public static Bitmap ImageToRgba(Bitmap src)
+        public static Image<Rgba32> UniformRgba(int width, int height, Rgba32 c)
         {
-            Bitmap clone = src.Clone(new Rectangle(0, 0, src.Width, src.Height), PixelFormat.Format32bppRgb);
-            //using (Graphics gr = Graphics.FromImage(clone))
-            //{
-            //    gr.DrawImage(src, new Rectangle(0, 0, clone.Width, clone.Height));
-            //}
-            return clone;
-        }
-
-        public static Bitmap CopyRgba(Bitmap src)
-        {
-            Bitmap clone = (Bitmap)src.Clone();
-            return clone;
-        }
-
-        public static Bitmap UniformRgba(int width, int height, Color c)
-        {
-            Bitmap image = new Bitmap(width, height);
-            using (Graphics gr = Graphics.FromImage(image))
-            {
-                gr.Clear(c);
-            }
+            Image<Rgba32> image = new Image<Rgba32>(width, height);
+            image.Mutate(i => i.Fill(c));
+            image.Save("c:\\temp\\0uniform.png");
             return image;
         }
 
-        public static Color AverageImageColor(Bitmap image)
+        public static Rgba32 AverageImageColor(Image<Rgba32> image)
         {
-            var rgba = ImageToRgba(image);
-            Size size = rgba.Size;
-            int w = size.Width;
-            int h = size.Height;
+            int w = image.Width;
+            int h = image.Height;
             int r = 0, g = 0, b = 0;
 
-            var rgbaData = rgba.LockBits(
-                new Rectangle(0, 0, rgba.Width, rgba.Height),
-                ImageLockMode.ReadWrite, rgba.PixelFormat);
-            int numBytes = rgbaData.Stride * rgba.Height;
-            byte[] rgbaBytes = new byte[numBytes];
-            Marshal.Copy(rgbaData.Scan0, rgbaBytes, 0, numBytes);
-            rgba.UnlockBits(rgbaData);
-
-            for (int i = 0; i < rgbaBytes.Length; i += 4)
-            {
-                b += rgbaBytes[i]-1;
-                g += rgbaBytes[i + 1]-1;
-                r += rgbaBytes[i + 2]-1;
-            }
+            for (int y = 0; y < h; y++)
+                for (int x = 0; x < w; x++)
+                {
+                    b += image[x, y].B;
+                    g += image[x, y].G;
+                    r += image[x, y].R;
+                }
             r /= w * h;
             g /= w * h;
             b /= w * h;
-            Color result = Color.FromArgb(255, r, g, b);
+            Rgba32 result = new Rgba32((byte)r, (byte)g, (byte)b, (byte)255);
             return result;
         }
 
-        public static Bitmap Resize(Bitmap image)
+        public static Image<Rgba32> Resize(Image<Rgba32> image)
         {
             int width, height;
             int size = Parameters.InputResize;
@@ -180,33 +149,9 @@ namespace primitive
                 width = Convert.ToInt32(image.Width * size / (double)image.Height);
                 height = size;
             }
-
-            Bitmap resized = new Bitmap(width, height);
-            using (var graphics = Graphics.FromImage(resized))
-            {
-                graphics.CompositingQuality = CompositingQuality.HighSpeed;
-                graphics.InterpolationMode = InterpolationMode.Bilinear;
-                graphics.CompositingMode = CompositingMode.SourceCopy;
-                graphics.DrawImage(image, 0, 0, width, height);
-            }
-
-            return resized;
+            image.Mutate(im => im.Resize(width, height));
+            return image;
         }
-
-
-        private static ImageCodecInfo getEncoder(ImageFormat format)
-        {
-            ImageCodecInfo[] codecs = ImageCodecInfo.GetImageDecoders();
-            foreach (ImageCodecInfo codec in codecs)
-            {
-                if (codec.FormatID == format.Guid)
-                {
-                    return codec;
-                }
-            }
-            return null;
-        }
-
     }
 
     public static class RandomExtensions

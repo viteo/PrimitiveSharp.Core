@@ -1,48 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using SixLabors.ImageSharp;
 
 namespace primitive
 {
     public static class Core
     {
-        public static Color ComputeColor(Bitmap target, Bitmap current, List<Scanline> lines, int alpha)
+        public static Rgba32 ComputeColor(Image<Rgba32> target, Image<Rgba32> current, List<Scanline> lines, int alpha)
         {
             long rsum = 0, gsum = 0, bsum = 0, count = 0;
             var a = 0x101 * 255 / alpha;
 
-            var dataTarget = target.LockBits(
-                new Rectangle(0, 0, target.Width, target.Height),
-                ImageLockMode.ReadOnly, target.PixelFormat);
-            var dataCurrent = current.LockBits(
-                new Rectangle(0, 0, current.Width, current.Height),
-                ImageLockMode.ReadOnly, current.PixelFormat);
-            int numBytesTarget = dataTarget.Stride * target.Height;
-            int numBytesCurrent = dataCurrent.Stride * current.Height;
-            byte[] rgbaTarget = new byte[numBytesTarget];
-            byte[] rgbaCurrent = new byte[numBytesCurrent];
-            Marshal.Copy(dataTarget.Scan0, rgbaTarget, 0, numBytesTarget);
-            Marshal.Copy(dataCurrent.Scan0, rgbaCurrent, 0, numBytesCurrent);
-            int stride = dataTarget.Stride;
-            target.UnlockBits(dataTarget);
-            current.UnlockBits(dataCurrent);
-
             foreach (var line in lines)
             {
-                int i = pixOffset(line.X1, line.Y, stride);
                 for (int x = line.X1; x <= line.X2; x++)
                 {
-                    var tb = (int)rgbaTarget[i];
-                    var tg = (int)rgbaTarget[i + 1];
-                    var tr = (int)rgbaTarget[i + 2];
-                    var cb = (int)rgbaCurrent[i];
-                    var cg = (int)rgbaCurrent[i + 1];
-                    var cr = (int)rgbaCurrent[i + 2];
-                    i += 4;
+                    var tb = (int)target[x, line.Y].B;
+                    var tg = (int)target[x, line.Y].G;
+                    var tr = (int)target[x, line.Y].R;
+                    var cb = (int)current[x, line.Y].B;
+                    var cg = (int)current[x, line.Y].G;
+                    var cr = (int)current[x, line.Y].R;
                     rsum += (long)((tr - cr) * a + cr * 0x101);
                     gsum += (long)((tg - cg) * a + cg * 0x101);
                     bsum += (long)((tb - cb) * a + cb * 0x101);
@@ -51,44 +32,25 @@ namespace primitive
             }
 
             if (count == 0)
-                return Color.Black;
+                return Rgba32.Black;
 
             var r = Util.ClampInt((int)(rsum / count) >> 8, 0, 255);
             var g = Util.ClampInt((int)(gsum / count) >> 8, 0, 255);
             var b = Util.ClampInt((int)(bsum / count) >> 8, 0, 255);
 
-            return Color.FromArgb(alpha, r, g, b);
+            return new Rgba32((byte)r, (byte)g, (byte)b, (byte)alpha);
         }
 
-        public static void CopyLines(Bitmap dst, Bitmap src, List<Scanline> lines)
+        public static void CopyLines(Image<Rgba32> dst, Image<Rgba32> src, List<Scanline> lines)
         {
-            var dataDst = dst.LockBits(
-                new Rectangle(0, 0, dst.Width, dst.Height),
-                ImageLockMode.ReadWrite, dst.PixelFormat);
-            var dataSrc = src.LockBits(
-                new Rectangle(0, 0, src.Width, src.Height),
-                ImageLockMode.ReadWrite, src.PixelFormat);
-            int numBytesDst = dataDst.Stride * dst.Height;
-            int numBytesSrc = dataSrc.Stride * src.Height;
-            byte[] rgbaDst = new byte[numBytesDst];
-            byte[] rgbaSrc = new byte[numBytesSrc];
-            Marshal.Copy(dataDst.Scan0, rgbaDst, 0, numBytesDst);
-            Marshal.Copy(dataSrc.Scan0, rgbaSrc, 0, numBytesSrc);
-
             foreach (var line in lines)
             {
-                int a = pixOffset(line.X1, line.Y, dataDst.Stride);
-                int b = a + (line.X2 - line.X1 + 1) * 4;
-                Array.Copy(rgbaSrc, a, rgbaDst, a, Math.Abs(b - a));
+                for (int x = line.X1; x < line.X2; x++)
+                    dst[x, line.Y] = src[x, line.Y];
             }
-
-            Marshal.Copy(rgbaDst, 0, dataDst.Scan0, numBytesDst);
-            Marshal.Copy(rgbaSrc, 0, dataSrc.Scan0, numBytesSrc);
-            dst.UnlockBits(dataDst);
-            src.UnlockBits(dataSrc);
         }
 
-        public static void DrawLines(Bitmap im, Color c, List<Scanline> lines)
+        public static void DrawLines(Image<Rgba32> im, Rgba32 c, List<Scanline> lines)
         {
             const int m = 0xffff;
 
@@ -106,75 +68,45 @@ namespace primitive
             sb /= 0xff;
             uint sa = (uint)(c.A);
             sa |= sa << 8;
-            
-            var dataIm = im.LockBits(
-                new Rectangle(0, 0, im.Width, im.Height),
-                ImageLockMode.ReadWrite, im.PixelFormat);
-            int numBytesIm = dataIm.Stride * im.Height;
-            byte[] rgbaIm = new byte[numBytesIm];
-            Marshal.Copy(dataIm.Scan0, rgbaIm, 0, numBytesIm);
-
 
             foreach (var line in lines)
             {
                 var ma = line.Alpha;
                 var a = (m - sa * ma / m) * 0x101;
-                var i = pixOffset(line.X1, line.Y, dataIm.Stride);
                 for (int x = line.X1; x <= line.X2; x++)
                 {
-                    var db = (uint)(rgbaIm[i + 0]);
-                    var dg = (uint)(rgbaIm[i + 1]);
-                    var dr = (uint)(rgbaIm[i + 2]);
-                    var da = (uint)(rgbaIm[i + 3]);
-                    rgbaIm[i + 0] = (byte)((db * a + sb * ma) / m >> 8);
-                    rgbaIm[i + 1] = (byte)((dg * a + sg * ma) / m >> 8);
-                    rgbaIm[i + 2] = (byte)((dr * a + sr * ma) / m >> 8);
-                    rgbaIm[i + 3] = (byte)((da * a + sa * ma) / m >> 8);
-                    i += 4;
+                    var db = (uint)im[x, line.Y].B;
+                    var dg = (uint)im[x, line.Y].G;
+                    var dr = (uint)im[x, line.Y].R;
+                    var da = (uint)im[x, line.Y].A;
+                    c = new Rgba32(
+                        (byte)((dr * a + sr * ma) / m >> 8),
+                        (byte)((dg * a + sg * ma) / m >> 8),
+                        (byte)((db * a + sb * ma) / m >> 8),
+                        (byte)((da * a + sa * ma) / m >> 8));
+                    im[x, line.Y] = c;
                 }
             }
-            Marshal.Copy(rgbaIm, 0, dataIm.Scan0, numBytesIm);
-            im.UnlockBits(dataIm);
         }
 
-        public static double DifferenceFull(Bitmap a, Bitmap b)
+        public static double DifferenceFull(Image<Rgba32> a, Image<Rgba32> b)
         {
             int w = a.Width;
             int h = a.Height;
             ulong total = 0;
 
-            var dataA = a.LockBits(
-                new Rectangle(0, 0, a.Width, a.Height),
-                ImageLockMode.ReadOnly, a.PixelFormat);
-            int numBytesA = dataA.Stride * a.Height;
-            byte[] rgbaA = new byte[numBytesA];
-            Marshal.Copy(dataA.Scan0, rgbaA, 0, numBytesA);
-
-            var dataB = b.LockBits(
-                new Rectangle(0, 0, b.Width, b.Height),
-                ImageLockMode.ReadOnly, b.PixelFormat);
-            int numBytesB = dataB.Stride * b.Height;
-            byte[] rgbaB = new byte[numBytesB];
-            Marshal.Copy(dataB.Scan0, rgbaB, 0, numBytesB);
-
-            var stride = dataA.Stride;
-            a.UnlockBits(dataA);
-            b.UnlockBits(dataB);
-
             for (int y = 0; y < h; y++)
             {
-                var i = pixOffset(0, y, stride);
                 for (int x = 0; x < w; x++)
                 {
-                    int ab = (int)rgbaA[i];
-                    int ag = (int)rgbaA[i + 1];
-                    int ar = (int)rgbaA[i + 2];
-                    int aa = (int)rgbaA[i + 3];
-                    int bb = (int)rgbaB[i];
-                    int bg = (int)rgbaB[i + 1];
-                    int br = (int)rgbaB[i + 2];
-                    int ba = (int)rgbaB[i + 3];
-                    i += 4;
+                    int ab = (int)a[x, y].B;
+                    int ag = (int)a[x, y].G;
+                    int ar = (int)a[x, y].R;
+                    int aa = (int)a[x, y].A;
+                    int bb = (int)b[x, y].B;
+                    int bg = (int)b[x, y].G;
+                    int br = (int)b[x, y].R;
+                    int ba = (int)b[x, y].A;
                     var dr = ar - br;
                     var dg = ag - bg;
                     var db = ab - bb;
@@ -185,53 +117,28 @@ namespace primitive
             return Math.Sqrt((double)total / (double)(w * h * 4)) / 255; ;
         }
 
-        public static double DifferencePartial(Bitmap target, Bitmap before, Bitmap after, double score, List<Scanline> lines)
+        public static double DifferencePartial(Image<Rgba32> target, Image<Rgba32> before, Image<Rgba32> after, double score, List<Scanline> lines)
         {
             int w = target.Width;
             int h = target.Height;
             var total = (ulong)(Math.Pow(score * 255, 2) * (double)(w * h * 4));
 
-            var dataTarget = target.LockBits(
-                new Rectangle(0, 0, target.Width, target.Height),
-                ImageLockMode.ReadOnly, target.PixelFormat);
-            var dataBefore = before.LockBits(
-                new Rectangle(0, 0, before.Width, before.Height),
-                ImageLockMode.ReadOnly, before.PixelFormat);
-            var dataAfter = after.LockBits(
-                new Rectangle(0, 0, after.Width, after.Height),
-                ImageLockMode.ReadOnly, after.PixelFormat);
-            int numBytesTarget = dataTarget.Stride * target.Height;
-            int numBytesBefore = dataBefore.Stride * before.Height;
-            int numBytesAfter = dataAfter.Stride * after.Height;
-            byte[] rgbaTarget = new byte[numBytesTarget];
-            byte[] rgbaBefore = new byte[numBytesBefore];
-            byte[] rgbaAfter = new byte[numBytesAfter];
-            Marshal.Copy(dataTarget.Scan0, rgbaTarget, 0, numBytesTarget);
-            Marshal.Copy(dataBefore.Scan0, rgbaBefore, 0, numBytesBefore);
-            Marshal.Copy(dataAfter.Scan0, rgbaAfter, 0, numBytesAfter);
-            int stride = dataTarget.Stride;
-            target.UnlockBits(dataTarget);
-            before.UnlockBits(dataBefore);
-            after.UnlockBits(dataAfter);
-
             foreach (var line in lines)
             {
-                int i = pixOffset(line.X1, line.Y, stride);
                 for (int x = line.X1; x <= line.X2; x++)
                 {
-                    int tb = rgbaTarget[i];
-                    int tg = rgbaTarget[i + 1];
-                    int tr = rgbaTarget[i + 2];
-                    int ta = rgbaTarget[i + 3];
-                    int bb = rgbaBefore[i];
-                    int bg = rgbaBefore[i + 1];
-                    int br = rgbaBefore[i + 2];
-                    int ba = rgbaBefore[i + 3];
-                    int ab = rgbaAfter[i];
-                    int ag = rgbaAfter[i + 1];
-                    int ar = rgbaAfter[i + 2];
-                    int aa = rgbaAfter[i + 3];
-                    i += 4;
+                    int tb = target[x, line.Y].B;
+                    int tg = target[x, line.Y].G;
+                    int tr = target[x, line.Y].R;
+                    int ta = target[x, line.Y].A;
+                    int bb = before[x, line.Y].B;
+                    int bg = before[x, line.Y].G;
+                    int br = before[x, line.Y].R;
+                    int ba = before[x, line.Y].A;
+                    int ab = after[x, line.Y].B;
+                    int ag = after[x, line.Y].G;
+                    int ar = after[x, line.Y].R;
+                    int aa = after[x, line.Y].A;
                     var dr1 = tr - br;
                     var dg1 = tg - bg;
                     var db1 = tb - bb;
@@ -246,12 +153,5 @@ namespace primitive
             }
             return Math.Sqrt((double)total / (double)(w * h * 4)) / 255;
         }
-
-        private static int pixOffset(int x, int y, int stride)
-        {
-            return y * stride + x * 4;
-        }
-
     }
-
 }

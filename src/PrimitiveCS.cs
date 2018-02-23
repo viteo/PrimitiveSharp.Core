@@ -114,22 +114,22 @@ namespace primitive
                 inputImage = Util.Resize(inputImage);
 
             // determine background color
-            Color bgColor;
+            Rgba32 bgColor;
             if (Parameters.Background == "")
                 bgColor = Util.AverageImageColor(inputImage);
             else
-                bgColor = ColorTranslator.FromHtml(Parameters.Background);
+                bgColor = Rgba32.FromHex(Parameters.Background);
 
 
             // run algorithm
             Model model = new Model(inputImage, bgColor, Parameters.OutputSize, Parameters.Workers);
-            Logger.WriteLine(1, "{0}: t={1:G3}, score={2:G6}\n", 0, 0.0, model.Score);
+            Logger.WriteLine(1, "{0}: t={1:G3}, score={2:G6}", 0, 0.0, model.Score);
             var start = DateTime.Now;
             int frame = 0, j = 0;
 
             foreach (var shapeConfig in Parameters.ShapeConfigs.ConfigList)
             {
-                Logger.WriteLine(1, "count={0}, mode={1}, alpha={2}, repeat={3}\n", shapeConfig.Count, shapeConfig.Mode, shapeConfig.Alpha, shapeConfig.Repeat);
+                Logger.WriteLine(1, "count={0}, mode={1}, alpha={2}, repeat={3}", shapeConfig.Count, shapeConfig.Mode, shapeConfig.Alpha, shapeConfig.Repeat);
                 for (int i = 0; i < shapeConfig.Count; i++)
                 {
                     frame++;
@@ -137,9 +137,12 @@ namespace primitive
                     // find optimal shape and add it to the model
                     var t = DateTime.Now;
                     var n = model.Step((ShapeType)shapeConfig.Mode, shapeConfig.Alpha, shapeConfig.Repeat);
+
+                    model.Current.Save(String.Format("c:\\temp\\frame{0:##}.png",frame));
+
                     var nps = Util.NumberString((double)n / (DateTime.Now - t).Seconds);
                     var elapsed = (DateTime.Now - start).Seconds;
-                    Logger.WriteLine(1, "{0}: t={1:G3}, score={2:G6}, n={3}, n/s={4}\n", frame, elapsed, model.Score, n, nps);
+                    Logger.WriteLine(1, "{0}: t={1:G3}, score={2:G6}, n={3}, n/s={4}", frame, elapsed, model.Score, n, nps);
 
                     // write output image(s)
                     foreach (var outFile in Parameters.OutputFiles.FileList)
@@ -154,7 +157,7 @@ namespace primitive
                             var path = outFile;
                             if (percent)
                                 path = String.Format(outFile, frame);
-                            Logger.WriteLine(1, "writing {0}\n", path);
+                            Logger.WriteLine(1, "writing {0}", path);
                             switch (ext)
                             {
                                 case ".png":
@@ -165,7 +168,7 @@ namespace primitive
                                     Util.SaveFile(path, model.SVG()); break;
                                 case ".gif":
                                     var frames = model.Frames(0.001);
-                                    Util.SaveGIFImageMagick(path, frames.ToArray(), 50, 250); break;
+                                    Util.SaveGIFImageMagick(path, frames, 50, 250); break;
                                 default:
                                     throw new Exception("unrecognized file extension: " + ext);
                             }

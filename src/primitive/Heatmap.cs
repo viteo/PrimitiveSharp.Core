@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace primitive
 {
@@ -45,13 +46,9 @@ namespace primitive
                 count[i] += a.count[i];
         }
 
-        public Bitmap Image(double gamma)
+        public Image<Short2> Image(double gamma)
         {
-            Bitmap im = new Bitmap(W, H, PixelFormat.Format16bppGrayScale);
-            var data = im.LockBits(
-                new Rectangle(0, 0, im.Width, im.Height),
-                ImageLockMode.ReadWrite,
-                im.PixelFormat);
+            Image<Short2> im = new Image<Short2>(W, H);
             ulong hi = 0;
             foreach (var h in count)
             {
@@ -64,14 +61,11 @@ namespace primitive
             {
                 for (int x = 0; x < W; x++)
                 {
-                    double p = (double) count[i] / (double) hi;
+                    double p = (double)count[i] / (double)hi;
                     p = Math.Pow(p, gamma);
-                    Marshal.WriteInt16(data.Scan0, i * 2, (short)(p * 0xffff));
-                    i++;
+                    im[x, y] = new Short2((short)(p * 0xffff), (short)(p * 0xffff));
                 }
             }
-
-            im.UnlockBits(data);
             return im;
         }
     }

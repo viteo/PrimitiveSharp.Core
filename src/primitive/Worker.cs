@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Text;
+using SixLabors.ImageSharp;
 
 namespace primitive
 {
@@ -9,9 +9,9 @@ namespace primitive
     {
         public int W { get; set; }
         public int H { get; set; }
-        public Bitmap Target { get; set; }
-        public Bitmap Current { get; set; }
-        public Bitmap Buffer { get; set; }
+        public Image<Rgba32> Target { get; set; }
+        public Image<Rgba32> Current { get; set; }
+        public Image<Rgba32> Buffer { get; set; }
         //todo Rasterizer
         public List<Scanline> Lines { get; set; }
         public Heatmap Heatmap { get; set; }
@@ -19,21 +19,21 @@ namespace primitive
         public double Score { get; set; }
         public int Counter { get; set; }
 
-        public Worker(Bitmap target)
+        public Worker(Image<Rgba32> target)
         {
             var w = target.Width;
             var h = target.Height;
             W = w;
             H = h;
             Target = target;
-            Buffer = new Bitmap(target.Width, target.Height);
+            Buffer = new Image<Rgba32>(target.Width, target.Height);
             //todo Raserizer
             Lines = new List<Scanline>();
             Heatmap = new Heatmap(w, h);
             Rnd = new Random((int)DateTime.Now.Ticks);
         }
 
-        public void Init(Bitmap current, double score)
+        public void Init(Image<Rgba32> current, double score)
         {
             Current = current;
             Score = score;
@@ -46,7 +46,7 @@ namespace primitive
             Counter++;
             var lines = shape.Rasterize();
             //Heatmap.Add(lines);
-            var color = Core.ComputeColor(Target, Current, lines, alpha);
+            Rgba32 color = Core.ComputeColor(Target, Current, lines, alpha);
             Core.CopyLines(Buffer, Current, lines);
             Core.DrawLines(Buffer, color, lines);
             return Core.DifferencePartial(Target, Current, Buffer, Score, lines);
@@ -55,12 +55,12 @@ namespace primitive
         public State BestHillClimbState(ShapeType t, int a, int n, int age, int m)
         {
             double bestEnergy = 0;
-            State bestState = new State();
+            IAnnealable bestState = new State();
             for (int i = 0; i < m; i++)
             {
-                var state = BestRandomState(t, a, n);
+                IAnnealable state = BestRandomState(t, a, n);
                 var before = state.Energy();
-                state = Optimize.HillClimb(state, age) as State;
+                state = Optimize.HillClimb(state, age);
                 var energy = state.Energy();
                 Logger.WriteLine(2, "{0}x random: {1:G6} -> {2}x hill climb: {3:G6} ", n, before, age, energy);
                 if (i == 0 || energy < bestEnergy)
@@ -69,7 +69,7 @@ namespace primitive
                     bestState = state;
                 }
             }
-            return bestState;
+            return bestState as State;
         }
 
         public State BestRandomState(ShapeType t, int a, int n)
@@ -103,8 +103,8 @@ namespace primitive
                 //    return new State(this, NewRandomEllipse(this), a);
                 //case ShapeType.ShapeTypeCircle:
                 //    return new State(this, NewRandomCircle(this), a);
-                //case ShapeType.ShapeTypeRotatedRectangle:
-                //    return new State(this, new RectangleRotated(this), a);
+                case ShapeType.ShapeTypeRotatedRectangle:
+                    return new State(this, new RectangleRotated(this), a);
                 //case ShapeType.ShapeTypeQuadratic:
                 //    return new State(this, NewRandomQuadratic(this), a);
                 //case ShapeType.ShapeTypeRotatedEllipse:

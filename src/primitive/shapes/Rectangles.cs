@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Text;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Helpers;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.Primitives;
 
 namespace primitive
 {
@@ -41,10 +43,11 @@ namespace primitive
             else { Y1 = y1; Y2 = y2; }
         }
 
-        public void Draw(Graphics dc, SolidBrush brush, double scale)
+        public void Draw(Image<Rgba32> image, Rgba32 color, double scale)
         {
             CheckBounds();
-            dc.FillRectangle(brush, X1, Y1, X2 - X1 + 1, Y2 - Y1 + 1);
+            image.Mutate(im => im
+            .Fill(color, new Rectangle(X1, Y1, X2 - X1 + 1, Y2 - Y1 + 1)));
         }
 
         public string SVG(string attrs)
@@ -115,16 +118,17 @@ namespace primitive
             Angle = angle;
         }
 
-        public void Draw(Graphics dc, SolidBrush brush, double scale)
+        public void Draw(Image<Rgba32> image, Rgba32 color, double scale)
         {
-            using (Matrix m = new Matrix())
-            {
-                m.Rotate(Angle);
-                m.Translate(X, Y);
-                dc.Transform = m;
-                dc.FillRectangle(brush, -Sx / 2f, -Sy / 2f, Sx, Sy);
-                dc.ResetTransform();
-            }
+            //image.Mutate(im => im
+            //.Fill(color, new RectangleF(-Sx / 2f, -Sy / 2f, Sx, Sy))
+            //);
+            //using (Image<Rgba32> rr = new Image<Rgba32>(Sx, Sy))
+            //{
+            //    rr.Mutate(rec => rec.Fill(color, new RectangleF(-Sx / 2f, -Sy / 2f, Sx, Sy)).Rotate(Angle));
+            //    image.Mutate(im => im
+            //        .DrawImage(rr, rr.Size(), new Point(X, Y), GraphicsOptions.Default));
+            //}
         }
 
         public string SVG(string attrs)
