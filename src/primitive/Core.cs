@@ -15,24 +15,17 @@ namespace primitive
             var a = 0x101 * 255 / alpha;
 
             foreach (var line in lines)
-            {
                 for (int x = line.X1; x <= line.X2; x++)
                 {
-                    var tb = (int)target[x, line.Y].B;
-                    var tg = (int)target[x, line.Y].G;
-                    var tr = (int)target[x, line.Y].R;
-                    var cb = (int)current[x, line.Y].B;
-                    var cg = (int)current[x, line.Y].G;
-                    var cr = (int)current[x, line.Y].R;
-                    rsum += (long)((tr - cr) * a + cr * 0x101);
-                    gsum += (long)((tg - cg) * a + cg * 0x101);
-                    bsum += (long)((tb - cb) * a + cb * 0x101);
+                    var tc = target[x, line.Y];
+                    var cc = current[x, line.Y];
+                    rsum += (tc.R - cc.R) * a + cc.R * 0x101;
+                    gsum += (tc.G - cc.G) * a + cc.G * 0x101;
+                    bsum += (tc.B - cc.B) * a + cc.B * 0x101;
                     count++;
                 }
-            }
 
-            if (count == 0)
-                return Rgba32.Black;
+            if (count == 0) return Rgba32.Black;
 
             var r = Util.ClampInt((int)(rsum / count) >> 8, 0, 255);
             var g = Util.ClampInt((int)(gsum / count) >> 8, 0, 255);
@@ -75,15 +68,12 @@ namespace primitive
                 var a = (m - sa * ma / m) * 0x101;
                 for (int x = line.X1; x <= line.X2; x++)
                 {
-                    var db = (uint)im[x, line.Y].B;
-                    var dg = (uint)im[x, line.Y].G;
-                    var dr = (uint)im[x, line.Y].R;
-                    var da = (uint)im[x, line.Y].A;
+                    var dc = im[x, line.Y];
                     c = new Rgba32(
-                        (byte)((dr * a + sr * ma) / m >> 8),
-                        (byte)((dg * a + sg * ma) / m >> 8),
-                        (byte)((db * a + sb * ma) / m >> 8),
-                        (byte)((da * a + sa * ma) / m >> 8));
+                        (byte)((dc.R * a + sr * ma) / m >> 8),
+                        (byte)((dc.G * a + sg * ma) / m >> 8),
+                        (byte)((dc.B * a + sb * ma) / m >> 8),
+                        (byte)((dc.A * a + sa * ma) / m >> 8));
                     im[x, line.Y] = c;
                 }
             }
@@ -99,18 +89,12 @@ namespace primitive
             {
                 for (int x = 0; x < w; x++)
                 {
-                    int ab = (int)a[x, y].B;
-                    int ag = (int)a[x, y].G;
-                    int ar = (int)a[x, y].R;
-                    int aa = (int)a[x, y].A;
-                    int bb = (int)b[x, y].B;
-                    int bg = (int)b[x, y].G;
-                    int br = (int)b[x, y].R;
-                    int ba = (int)b[x, y].A;
-                    var dr = ar - br;
-                    var dg = ag - bg;
-                    var db = ab - bb;
-                    var da = aa - ba;
+                    var ac = a[x, y];
+                    var bc = b[x, y];
+                    var dr = ac.R - bc.R;
+                    var dg = ac.G - bc.G;
+                    var db = ac.B - bc.B;
+                    var da = ac.A - bc.A;
                     total += (ulong)(dr * dr + dg * dg + db * db + da * da);
                 }
             }
@@ -127,26 +111,17 @@ namespace primitive
             {
                 for (int x = line.X1; x <= line.X2; x++)
                 {
-                    int tb = target[x, line.Y].B;
-                    int tg = target[x, line.Y].G;
-                    int tr = target[x, line.Y].R;
-                    int ta = target[x, line.Y].A;
-                    int bb = before[x, line.Y].B;
-                    int bg = before[x, line.Y].G;
-                    int br = before[x, line.Y].R;
-                    int ba = before[x, line.Y].A;
-                    int ab = after[x, line.Y].B;
-                    int ag = after[x, line.Y].G;
-                    int ar = after[x, line.Y].R;
-                    int aa = after[x, line.Y].A;
-                    var dr1 = tr - br;
-                    var dg1 = tg - bg;
-                    var db1 = tb - bb;
-                    var da1 = ta - ba;
-                    var dr2 = tr - ar;
-                    var dg2 = tg - ag;
-                    var db2 = tb - ab;
-                    var da2 = ta - aa;
+                    var tc = target[x, line.Y];
+                    var bc = before[x, line.Y];
+                    var ac = after[x, line.Y];
+                    var dr1 = tc.R - bc.R;
+                    var dg1 = tc.G - bc.G;
+                    var db1 = tc.B - bc.B;
+                    var da1 = tc.A - bc.A;
+                    var dr2 = tc.R - ac.R;
+                    var dg2 = tc.G - ac.G;
+                    var db2 = tc.B - ac.B;
+                    var da2 = tc.A - ac.A;
                     total -= (ulong)(dr1 * dr1 + dg1 * dg1 + db1 * db1 + da1 * da1);
                     total += (ulong)(dr2 * dr2 + dg2 * dg2 + db2 * db2 + da2 * da2);
                 }
