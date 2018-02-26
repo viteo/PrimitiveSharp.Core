@@ -95,8 +95,8 @@ namespace primitive
             {
                 default:
                     return RandomState((ShapeType)(Rnd.Next(8) + 1), a);
-                //case ShapeType.ShapeTypeTriangle:
-                //    return new State(this, NewRandomTriangle(this), a);
+                case ShapeType.ShapeTypeTriangle:
+                    return new State(this, new Triangle(this), a);
                 case ShapeType.ShapeTypeRectangle:
                     return new State(this, new RectangleStrait(this), a);
                 //case ShapeType.ShapeTypeEllipse:

@@ -137,7 +137,7 @@ namespace primitive
                     var t = DateTime.Now;
                     var n = model.Step((ShapeType)shapeConfig.Mode, shapeConfig.Alpha, shapeConfig.Repeat);
 
-                    model.Current.Save(String.Format("c:\\temp\\frame{0:##}.png",frame));
+                    //model.Current.Save(String.Format("c:\\temp\\frame{0:##}.png",frame));
 
                     var nps = Util.NumberString((double)n / (DateTime.Now - t).Seconds);
                     var elapsed = (DateTime.Now - start).Seconds;

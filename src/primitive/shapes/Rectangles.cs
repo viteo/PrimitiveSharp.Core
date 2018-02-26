@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Text;
 using SixLabors.ImageSharp;
 using SixLabors.Primitives;
@@ -45,7 +46,9 @@ namespace primitive
         {
             CheckBounds();
             image.Mutate(im => im
-            .Fill(color, new Rectangle(X1, Y1, X2 - X1 + 1, Y2 - Y1 + 1)));
+            //.Fill(color, new Rectangle(X1, Y1, X2 - X1 + 1, Y2 - Y1 + 1))
+            .Draw(color,1f, new RectangleF(X1, Y1, X2 - X1 + 1, Y2 - Y1 + 1))
+            );
         }
 
         public string SVG(string attrs)
@@ -53,7 +56,7 @@ namespace primitive
             CheckBounds();
             var w = X2 - X1 + 1;
             var h = Y2 - Y1 + 1;
-            return String.Format("<rect {0} x=\"{1}\" y=\"{2}\" width=\"{3}\" height=\"{4}\" />", attrs, X1, Y1, w, h);
+            return $"<rect {attrs} x=\"{X1}\" y=\"{Y1}\" width=\"{w}\" height=\"{h}\" />";
         }
 
         public IShape Copy()

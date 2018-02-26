@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Threading.Tasks;
 using SixLabors.ImageSharp;
+using SixLabors.Primitives;
 
 namespace primitive
 {
@@ -13,6 +15,7 @@ namespace primitive
         public Rgba32 Background { get; set; }
         public Image<Rgba32> Target { get; set; }
         public Image<Rgba32> Current { get; set; }
+        public Image<Rgba32> Result;
         public double Score { get; set; }
         public List<IShape> Shapes { get; set; }
         public List<Rgba32> Colors { get; set; }
@@ -43,8 +46,14 @@ namespace primitive
             Sh = sh;
             Scale = scale;
             Background = background;
-            Target = target.Clone();
+            Target = target;//.Clone();
             Current = Util.UniformRgba(target.Width, target.Height, background);
+
+            Matrix3x2 scalematrix = Matrix3x2.CreateScale((float)Scale);
+            Matrix3x2 translatematrix = Matrix3x2.CreateTranslation(0.5f, 0.5f);
+            Result = new Image<Rgba32>(Sw, Sh);
+            Result.Mutate(r => r.Transform(scalematrix*translatematrix));
+
             Score = Core.DifferenceFull(Target, Current);
             Shapes = new List<IShape>();
             Colors = new List<Rgba32>();
@@ -61,7 +70,7 @@ namespace primitive
         public List<Image<Rgba32>> Frames(double scoreDelta)
         {
             List<Image<Rgba32>> result = new List<Image<Rgba32>>();
-            Image<Rgba32> im = new Image<Rgba32>(Sw, Sh);
+            Image<Rgba32> im = Util.UniformRgba(Sw, Sh, Background);
             result.Add(im.Clone());
             double previous = 10;
             for (int i = 0; i < Shapes.Count; i++)
@@ -113,7 +122,7 @@ namespace primitive
             Colors.Add(color);
             Scores.Add(score);
 
-            shape.Draw(Current, color, Scale);
+            shape.Draw(Result, color, Scale);
         }
 
         public int Step(ShapeType shapeType, int alpha, int repeat)
@@ -156,7 +165,7 @@ namespace primitive
             if (m % wn != 0)
                 wm++;
 
-            var parameters = new List<(Worker,ShapeType,int,int,int,int)>();
+            var parameters = new List<(Worker, ShapeType, int, int, int, int)>();
             var results = new List<State>();
             var tasks = new List<Task>();
             for (int i = 0; i < wn; i++)
