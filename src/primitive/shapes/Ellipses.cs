@@ -103,4 +103,71 @@ namespace primitive
             return lines;
         }
     }
+
+    public class EllipseRotated : IShape
+    {
+        public Worker Worker { get; set; }
+        public double X { get; set; }
+        public double Y { get; set; }
+        public double Rx { get; set; }
+        public double Ry { get; set; }
+        public double Angle { get; set; }
+
+        public EllipseRotated(Worker worker)
+        {
+            Worker = worker;
+            var rnd = Worker.Rnd;
+            X = rnd.NextDouble() * Worker.W;
+            Y = rnd.NextDouble() * Worker.H;
+            Rx = rnd.NextDouble() * 32 + 1;
+            Ry = rnd.NextDouble() * 32 + 1;
+            Angle = rnd.NextDouble() * 360;
+        }
+
+        public EllipseRotated(Worker worker, double x, double y, double rx, double ry, double a)
+        {
+            Worker = worker;
+            X = x; Rx = rx;
+            Y = y; Ry = ry;
+            Angle = a;
+        }
+
+        public void Draw(Image<Rgba32> image, Rgba32 color, double scale)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string SVG(string attrs)
+        {
+            return $"<g transform=\"translate({X} {Y}) rotate({Angle}) scale({Rx} {Ry})\"><ellipse {attrs} cx=\"0\" cy=\"0\" rx=\"1\" ry=\"1\" /></g>"
+        }
+
+        public IShape Copy()
+        {
+            return new EllipseRotated(Worker, X, Y, Rx, Ry, Angle);
+        }
+
+        public void Mutate()
+        {
+            var w = Worker.W;
+            var h = Worker.H;
+            var rnd = Worker.Rnd;
+            switch (rnd.Next(3))
+            {
+                case 0:
+                    X = Util.Clamp(X + rnd.NextGaussian() * 16, 0, (double)(w - 1));
+                    Y = Util.Clamp(Y + rnd.NextGaussian() * 16, 0, (double)(h - 1)); break;
+                case 1:
+                    Rx = Util.Clamp(Rx + rnd.NextGaussian() * 16, 1, (double)(w - 1));
+                    Ry = Util.Clamp(Ry + rnd.NextGaussian() * 16, 1, (double)(w - 1)); break;
+                case 2:
+                    Angle = Angle + rnd.NextGaussian() * 32; break;
+            }
+        }
+
+        public List<Scanline> Rasterize()
+        {
+            throw new NotImplementedException();
+        }
+    }
 }
