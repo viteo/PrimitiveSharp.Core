@@ -7,7 +7,7 @@ using SixLabors.Primitives;
 
 namespace primitive
 {
-    public class RectangleStrait : IShape
+    public class RectangleStraight : IShape
     {
         public Worker Worker { get; set; }
         public int X1 { get; set; }
@@ -15,7 +15,7 @@ namespace primitive
         public int Y1 { get; set; }
         public int Y2 { get; set; }
 
-        public RectangleStrait(Worker worker)
+        public RectangleStraight(Worker worker)
         {
             var rnd = worker.Rnd;
             X1 = rnd.Next(worker.W);
@@ -25,7 +25,7 @@ namespace primitive
             Worker = worker;
         }
 
-        public RectangleStrait(Worker worker, int x1, int y1, int x2, int y2)
+        public RectangleStraight(Worker worker, int x1, int y1, int x2, int y2)
         {
             Worker = worker;
             X1 = x1; Y1 = y1;
@@ -61,7 +61,7 @@ namespace primitive
 
         public IShape Copy()
         {
-            return new RectangleStrait(Worker, X1, Y1, X2, Y2);
+            return new RectangleStraight(Worker, X1, Y1, X2, Y2);
         }
 
         public void Mutate()

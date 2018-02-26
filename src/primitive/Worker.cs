@@ -98,7 +98,7 @@ namespace primitive
                 case ShapeType.ShapeTypeTriangle:
                     return new State(this, new Triangle(this), a);
                 case ShapeType.ShapeTypeRectangle:
-                    return new State(this, new RectangleStrait(this), a);
+                    return new State(this, new RectangleStraight(this), a);
                 //case ShapeType.ShapeTypeEllipse:
                 //    return new State(this, NewRandomEllipse(this), a);
                 //case ShapeType.ShapeTypeCircle:
