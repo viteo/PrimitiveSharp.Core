@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Threading.Tasks;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
 using SixLabors.Primitives;
 
 namespace primitive
@@ -49,10 +50,8 @@ namespace primitive
             Target = target;//.Clone();
             Current = Util.UniformRgba(target.Width, target.Height, background);
 
-            Matrix3x2 scalematrix = Matrix3x2.CreateScale((float)Scale);
-            Matrix3x2 translatematrix = Matrix3x2.CreateTranslation(0.5f, 0.5f);
-            Result = new Image<Rgba32>(Sw, Sh);
-            Result.Mutate(r => r.Transform(scalematrix*translatematrix));
+            Result = Util.UniformRgba(Sw, Sh, Background);
+            //Result = Util.UniformRgba(target.Width, target.Height, Background);
 
             Score = Core.DifferenceFull(Target, Current);
             Shapes = new List<IShape>();

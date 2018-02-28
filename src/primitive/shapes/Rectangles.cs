@@ -4,6 +4,7 @@ using System.Numerics;
 using System.Text;
 using SixLabors.ImageSharp;
 using SixLabors.Primitives;
+using SixLabors.Shapes;
 
 namespace primitive
 {
@@ -45,10 +46,16 @@ namespace primitive
         public void Draw(Image<Rgba32> image, Rgba32 color, double scale)
         {
             CheckBounds();
+            PathBuilder pb = new PathBuilder();
+            pb.AddLine(X1, Y1, X1, Y2);
+            pb.AddLine(X1, Y2, X2, Y2);
+            pb.AddLine(X2, Y2, X2, Y1);
             image.Mutate(im => im
-            //.Fill(color, new Rectangle(X1, Y1, X2 - X1 + 1, Y2 - Y1 + 1))
-            .Draw(color,1f, new RectangleF(X1, Y1, X2 - X1 + 1, Y2 - Y1 + 1))
-            );
+            .Fill(color, pb.Build().Transform(Matrix3x2.CreateScale((float)scale))));
+
+            //image.Mutate(im => im
+            //.Fill(color, new RectangleF(X1 * s, Y1 * s, (X2 - X1 + 1) * s, (Y2 - Y1 + 1) * s))
+            //);
         }
 
         public string SVG(string attrs)
@@ -121,15 +128,16 @@ namespace primitive
 
         public void Draw(Image<Rgba32> image, Rgba32 color, double scale)
         {
-            //image.Mutate(im => im
-            //.Fill(color, new RectangleF(-Sx / 2f, -Sy / 2f, Sx, Sy))
-            //);
-            //using (Image<Rgba32> rr = new Image<Rgba32>(Sx, Sy))
-            //{
-            //    rr.Mutate(rec => rec.Fill(color, new RectangleF(-Sx / 2f, -Sy / 2f, Sx, Sy)).Rotate(Angle));
-            //    image.Mutate(im => im
-            //        .DrawImage(rr, rr.Size(), new Point(X, Y), GraphicsOptions.Default));
-            //}
+            PathBuilder pb = new PathBuilder();
+            var x1 = X - Sx / 2;
+            var x2 = X + Sx / 2;
+            var y1 = Y - Sy / 2;
+            var y2 = Y + Sy / 2;
+            pb.AddLine(x1, y1, x1, y2);
+            pb.AddLine(x1, y2, x2, y2);
+            pb.AddLine(x2, y2, x2, y1);
+            image.Mutate(im => im
+                .Fill(color, pb.Build().Transform(Matrix3x2.CreateScale((float)scale)).RotateDegree(Angle)));
         }
 
         public string SVG(string attrs)

@@ -160,9 +160,9 @@ namespace primitive
                             switch (ext)
                             {
                                 case ".png":
-                                    Util.SavePNG(path, model.Current); break;
+                                    Util.SavePNG(path, model.Result); break;
                                 case ".jpg": case ".jpeg":
-                                    Util.SaveJPG(path, model.Current, 95); break;
+                                    Util.SaveJPG(path, model.Result, 95); break;
                                 case ".svg":
                                     Util.SaveFile(path, model.SVG()); break;
                                 case ".gif":

@@ -103,7 +103,6 @@ namespace primitive
         {
             Image<Rgba32> image = new Image<Rgba32>(width, height);
             image.Mutate(i => i.Fill(c));
-            image.Save("c:\\temp\\0uniform.png");
             return image;
         }
 

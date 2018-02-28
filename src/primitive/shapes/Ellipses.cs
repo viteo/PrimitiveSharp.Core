@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Text;
 using SixLabors.ImageSharp;
+using SixLabors.Shapes;
 
 namespace primitive
 {
@@ -39,7 +41,9 @@ namespace primitive
 
         public void Draw(Image<Rgba32> image, Rgba32 color, double scale)
         {
-            //throw new NotImplementedException();
+            EllipsePolygon pb = new EllipsePolygon(X, Y, Rx * 2, Ry * 2);
+            image.Mutate(im => im
+                .Fill(color, pb.Transform(Matrix3x2.CreateScale((float)scale))));
         }
 
         public string SVG(string attrs)
@@ -88,7 +92,7 @@ namespace primitive
                 var y2 = Y + dy;
                 if ((y1 < 0 || y1 >= h) && (y2 < 0 || y2 >= h))
                     continue;
-                var s = (int)Math.Sqrt((Ry * Ry - dy * dy) * aspect);
+                var s = (int)(Math.Sqrt(Ry * Ry - dy * dy) * aspect);
                 var x1 = X - s;
                 var x2 = X + s;
                 if (x1 < 0)
@@ -139,7 +143,7 @@ namespace primitive
 
         public string SVG(string attrs)
         {
-            return $"<g transform=\"translate({X} {Y}) rotate({Angle}) scale({Rx} {Ry})\"><ellipse {attrs} cx=\"0\" cy=\"0\" rx=\"1\" ry=\"1\" /></g>"
+            return $"<g transform=\"translate({X} {Y}) rotate({Angle}) scale({Rx} {Ry})\"><ellipse {attrs} cx=\"0\" cy=\"0\" rx=\"1\" ry=\"1\" /></g>";
         }
 
         public IShape Copy()

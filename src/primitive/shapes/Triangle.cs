@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Text;
 using SixLabors.ImageSharp;
+using SixLabors.Shapes;
 
 namespace primitive
 {
@@ -37,7 +39,11 @@ namespace primitive
 
         public void Draw(Image<Rgba32> image, Rgba32 color, double scale)
         {
-            //throw new NotImplementedException();
+            PathBuilder pb = new PathBuilder();
+            pb.AddLine(X1, Y1, X2, Y2);
+            pb.AddLine(X2, Y2, X3, Y3);
+            image.Mutate(im => im
+                .Fill(color, pb.Build().Transform(Matrix3x2.CreateScale((float)scale))));
         }
 
         public string SVG(string attrs)
