@@ -5,6 +5,7 @@ using System.Text;
 using SixLabors.ImageSharp;
 using SixLabors.Primitives;
 using SixLabors.Shapes;
+using System.Linq;
 
 namespace primitive
 {
@@ -187,50 +188,92 @@ namespace primitive
         {
             var w = Worker.W;
             var h = Worker.H;
-            var angle = Util.Radians(Angle);
-            var (rx1, ry1) = Util.Rotate(-Sx / 2, -Sy / 2, angle);
-            var (rx2, ry2) = Util.Rotate(Sx / 2, -Sy / 2, angle);
-            var (rx3, ry3) = Util.Rotate(Sx / 2, Sy / 2, angle);
-            var (rx4, ry4) = Util.Rotate(-Sx / 2, Sy / 2, angle);
-            int x1 = (int)rx1 + X, y1 = (int)ry1 + Y;
-            int x2 = (int)rx2 + X, y2 = (int)ry2 + Y;
-            int x3 = (int)rx3 + X, y3 = (int)ry3 + Y;
-            int x4 = (int)rx4 + X, y4 = (int)ry4 + Y;
-            var miny = Math.Min(y1, Math.Min(y2, Math.Min(y3, y4)));
-            var maxy = Math.Max(y1, Math.Max(y2, Math.Max(y3, y4)));
-            var n = maxy - miny + 1;
-            int[] min = new int[n];
-            int[] max = new int[n];
-            for (int i = 0; i < min.Length; i++)
-                min[i] = w;
-            var xs = new int[] { x1, x2, x3, x4, x1 };
-            var ys = new int[] { y1, y2, y3, y4, y1 };
-            // TODO: this could be better probably
-            for (int i = 0; i < 4; i++)
+
+            PathBuilder pb = new PathBuilder();
+            var x1 = X - Sx / 2;
+            var x2 = X + Sx / 2;
+            var y1 = Y - Sy / 2;
+            var y2 = Y + Sy / 2;
+            pb.AddLine(x1, y1, x1, y2);
+            pb.AddLine(x1, y2, x2, y2);
+            pb.AddLine(x2, y2, x2, y1);
+            pb.AddLine(x2, y1, x1, y1);
+            var rect = pb.Build().RotateDegree(Angle);
+
+            List<Scanline> lines = new List<Scanline>();
+
+
+            var bounds = rect.Bounds;
+            var bot = Util.ClampInt((int)bounds.Bottom, 0, h - 1);
+            var top = Util.ClampInt((int)bounds.Top, 0, h - 1);
+            for (int i = bot; i >= top; i--)
             {
-                double x = xs[i], y = ys[i];
-                double dx = xs[i + 1] - xs[i], dy = ys[i + 1] - ys[i];
-                int count = (int)(Math.Sqrt(dx * dx + dy * dy)) * 2;
-                for (int j = 0; j < count; j++)
+                var interscertions = rect.FindIntersections(new PointF(bounds.Left, i), new PointF(bounds.Right, i)).ToList<PointF>();
+                if (interscertions.Count != 0 && interscertions.Count % 2 == 0)
                 {
-                    double t = j / (double)(count - 1);
-                    int xi = (int)(x + dx * t);
-                    int yi = (int)(y + dy * t) - miny;
-                    min[yi] = Math.Min(min[yi], xi);
-                    max[yi] = Math.Max(max[yi], xi);
+                    x1 = Util.ClampInt((int)interscertions[0].X, 0, w - 1);
+                    x2 = Util.ClampInt((int)interscertions[1].X, 0, w - 1);
+                    lines.Add(new Scanline { Alpha = 0xffff, X1 = Math.Min(x1, x2), X2 = Math.Max(x1, x2), Y = i });
                 }
+                //else if (interscertions.Count == 1)
+                //{
+                //    Console.WriteLine(interscertions.Count);
+                //    using (Image<Rgba32> image = new Image<Rgba32>(w, h))
+                //    {
+                //        image.Mutate(im => im
+                //        .Fill(Rgba32.White).Fill(Rgba32.Black, rect));
+                //        image.Save(@"c:\programs\rect.png");
+                //    }
+                //}
             }
-            var lines = new List<Scanline>();
-            for (int i = 0; i < n; i++)
-            {
-                var y = miny + i;
-                if (y < 0 || y >= h)
-                    continue;
-                var a = Math.Max(min[i], 0);
-                var b = Math.Min(max[i], w - 1);
-                if (b >= a)
-                    lines.Add(new Scanline() { Y = y, X1 = a, X2 = b, Alpha = 0xffff });
-            }
+
+
+
+
+            //var angle = Util.Radians(Angle);
+            //var (rx1, ry1) = Util.Rotate(-Sx / 2, -Sy / 2, angle);
+            //var (rx2, ry2) = Util.Rotate(Sx / 2, -Sy / 2, angle);
+            //var (rx3, ry3) = Util.Rotate(Sx / 2, Sy / 2, angle);
+            //var (rx4, ry4) = Util.Rotate(-Sx / 2, Sy / 2, angle);
+            //int x1 = (int)rx1 + X, y1 = (int)ry1 + Y;
+            //int x2 = (int)rx2 + X, y2 = (int)ry2 + Y;
+            //int x3 = (int)rx3 + X, y3 = (int)ry3 + Y;
+            //int x4 = (int)rx4 + X, y4 = (int)ry4 + Y;
+            //var miny = Math.Min(y1, Math.Min(y2, Math.Min(y3, y4)));
+            //var maxy = Math.Max(y1, Math.Max(y2, Math.Max(y3, y4)));
+            //var n = maxy - miny + 1;
+            //int[] min = new int[n];
+            //int[] max = new int[n];
+            //for (int i = 0; i < min.Length; i++)
+            //    min[i] = w;
+            //var xs = new int[] { x1, x2, x3, x4, x1 };
+            //var ys = new int[] { y1, y2, y3, y4, y1 };
+            //// TODO: this could be better probably
+            //for (int i = 0; i < 4; i++)
+            //{
+            //    double x = xs[i], y = ys[i];
+            //    double dx = xs[i + 1] - xs[i], dy = ys[i + 1] - ys[i];
+            //    int count = (int)(Math.Sqrt(dx * dx + dy * dy)) * 2;
+            //    for (int j = 0; j < count; j++)
+            //    {
+            //        double t = j / (double)(count - 1);
+            //        int xi = (int)(x + dx * t);
+            //        int yi = (int)(y + dy * t) - miny;
+            //        min[yi] = Math.Min(min[yi], xi);
+            //        max[yi] = Math.Max(max[yi], xi);
+            //    }
+            //}
+            //var lines = new List<Scanline>();
+            //for (int i = 0; i < n; i++)
+            //{
+            //    var y = miny + i;
+            //    if (y < 0 || y >= h)
+            //        continue;
+            //    var a = Math.Max(min[i], 0);
+            //    var b = Math.Min(max[i], w - 1);
+            //    if (b >= a)
+            //        lines.Add(new Scanline() { Y = y, X1 = a, X2 = b, Alpha = 0xffff });
+            //}
             return lines;
         }
 
