@@ -136,9 +136,6 @@ namespace primitive
                     // find optimal shape and add it to the model
                     var t = DateTime.Now;
                     var n = model.Step((ShapeType)shapeConfig.Mode, shapeConfig.Alpha, shapeConfig.Repeat);
-
-                    //model.Current.Save(String.Format("c:\\temp\\frame{0:##}.png",frame));
-
                     var nps = Util.NumberString((double)n / (DateTime.Now - t).Seconds);
                     var elapsed = (DateTime.Now - start).Seconds;
                     Logger.WriteLine(1, "{0}: t={1:G3}, score={2:G6}, n={3}, n/s={4}", frame, elapsed, model.Score, n, nps);
@@ -160,7 +157,7 @@ namespace primitive
                             switch (ext)
                             {
                                 case ".png":
-                                    model.Current.Save(@"c:\temp\owl_5curr.png");
+                                    //model.Current.Save(@"c:\temp\owl_ocurr.png");
                                     Util.SavePNG(path, model.Result); break;
                                 case ".jpg": case ".jpeg":
                                     Util.SaveJPG(path, model.Result, 95); break;

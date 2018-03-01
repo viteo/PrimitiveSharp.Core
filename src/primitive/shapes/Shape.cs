@@ -61,20 +61,21 @@ namespace primitive
             for (int i = bot; i >= top; i--)
             {
                 var n = path.FindIntersections(new PointF(bounds.Left, i), new PointF(bounds.Right, i), interscertions, 0);
+                var x = Util.ClampInt((int)interscertions[0].X, 0, w - 1);
                 if (n == 1)
                 {
                     lines.Add(new Scanline
                     {
                         Alpha = 0xffff,
-                        X1 = Util.ClampInt((int)interscertions[0].X, 0, w - 1),
-                        X2 = Util.ClampInt((int)interscertions[0].X, 0, w - 1),
+                        X1 = x,
+                        X2 = x,
                         Y = i
                     });
                     continue;
                 }
                 if (n == 2)
                 {
-                    var x1 = Util.ClampInt((int)interscertions[0].X, 0, w - 1);
+                    var x1 = x;
                     var x2 = Util.ClampInt((int)interscertions[1].X, 0, w - 1);
                     lines.Add(new Scanline
                     {

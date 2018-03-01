@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using SixLabors.ImageSharp;
 using SixLabors.Primitives;
 using SixLabors.Shapes;
 
@@ -90,6 +91,23 @@ namespace primitive
                 if (Valid())
                     break;
             }
+        }
+
+        public override void Draw(Image<Rgba32> image, Rgba32 color, double scale)
+        {
+            //Draw quadratic beizer is not yet available in ImageSharp, so lets draw cubic as quadratic
+            PointF pm1 = new PointF
+            {
+                X = (P2.X - P1.X)*2f/3f + P1.X,
+                Y = (P2.Y - P1.Y)*2f/3f + P1.Y,
+            };
+            PointF pm2 = new PointF
+            {
+                X = (P2.X - P3.X) * 2f / 3f + P3.X,
+                Y = (P2.Y - P3.Y) * 2f / 3f + P3.Y,
+            };
+            image.Mutate(im => im
+            .DrawBeziers(color,Width,new[]{P1,pm1,pm2,P3}));
         }
 
         public override List<Scanline> Rasterize()

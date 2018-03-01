@@ -105,8 +105,8 @@ namespace primitive
                     return new State(this, new EllipseStrait(this, true), a);
                 case ShapeType.ShapeTypeRotatedRectangle:
                     return new State(this, new RectangleRotated(this), a);
-                case ShapeType.ShapeTypeBezierQuadratic:
-                    return new State(this, new BezierQuadratic(this), a);
+                //case ShapeType.ShapeTypeBezierQuadratic:
+                //    return new State(this, new BezierQuadratic(this), a);
                 case ShapeType.ShapeTypeRotatedEllipse:
                     return new State(this, new EllipseRotated(this), a);
                 case ShapeType.ShapeTypePolygon:
