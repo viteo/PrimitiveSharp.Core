@@ -175,7 +175,6 @@ namespace primitive
             }
             Console.WriteLine("End");
         }
-
     }
 
     public static class Parameters
