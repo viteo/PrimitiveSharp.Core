@@ -7,9 +7,8 @@ using SixLabors.Shapes;
 
 namespace primitive
 {
-    public class EllipseStrait : IShape
+    public class EllipseStrait : Shape
     {
-        public Worker Worker { get; set; }
         public int X { get; set; }
         public int Y { get; set; }
         public int Rx { get; set; }
@@ -39,24 +38,22 @@ namespace primitive
             IsCircle = isCircle;
         }
 
-        public void Draw(Image<Rgba32> image, Rgba32 color, double scale)
+        public override IPath GetPath()
         {
-            EllipsePolygon pb = new EllipsePolygon(X, Y, Rx * 2, Ry * 2);
-            image.Mutate(im => im
-                .Fill(color, pb.Transform(Matrix3x2.CreateScale((float)scale))));
+            return new EllipsePolygon(X, Y, Rx * 2, Ry * 2);
         }
 
-        public string SVG(string attrs)
+        public override string SVG(string attrs)
         {
             return $"<ellipse {attrs} cx=\"{X}\" cy=\"{Y}\" rx=\"{Rx}\" ry=\"{Ry}\" />";
         }
 
-        public IShape Copy()
+        public override IShape Copy()
         {
             return new EllipseStrait(Worker, X, Y, Rx, Ry, IsCircle);
         }
 
-        public void Mutate()
+        public override void Mutate()
         {
             var w = Worker.W;
             var h = Worker.H;
@@ -80,7 +77,7 @@ namespace primitive
             }
         }
 
-        public List<Scanline> Rasterize()
+        public override List<Scanline> Rasterize()
         {
             var w = Worker.W;
             var h = Worker.H;
@@ -108,9 +105,8 @@ namespace primitive
         }
     }
 
-    public class EllipseRotated : IShape
+    public class EllipseRotated : Shape
     {
-        public Worker Worker { get; set; }
         public double X { get; set; }
         public double Y { get; set; }
         public double Rx { get; set; }
@@ -136,22 +132,22 @@ namespace primitive
             Angle = a;
         }
 
-        public void Draw(Image<Rgba32> image, Rgba32 color, double scale)
+        public override IPath GetPath()
         {
-            throw new NotImplementedException();
+            return new EllipsePolygon((float)X, (float)Y, (float)Rx * 2, (float)Ry * 2).Rotate((float)Util.Radians(Angle));
         }
 
-        public string SVG(string attrs)
+        public override string SVG(string attrs)
         {
             return $"<g transform=\"translate({X} {Y}) rotate({Angle}) scale({Rx} {Ry})\"><ellipse {attrs} cx=\"0\" cy=\"0\" rx=\"1\" ry=\"1\" /></g>";
         }
 
-        public IShape Copy()
+        public override IShape Copy()
         {
             return new EllipseRotated(Worker, X, Y, Rx, Ry, Angle);
         }
 
-        public void Mutate()
+        public override void Mutate()
         {
             var w = Worker.W;
             var h = Worker.H;
@@ -167,11 +163,6 @@ namespace primitive
                 case 2:
                     Angle = Angle + rnd.NextGaussian() * 32; break;
             }
-        }
-
-        public List<Scanline> Rasterize()
-        {
-            throw new NotImplementedException();
         }
     }
 }

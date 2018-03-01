@@ -160,6 +160,7 @@ namespace primitive
                             switch (ext)
                             {
                                 case ".png":
+                                    model.Current.Save(@"c:\temp\owl_5curr.png");
                                     Util.SavePNG(path, model.Result); break;
                                 case ".jpg": case ".jpeg":
                                     Util.SaveJPG(path, model.Result, 95); break;

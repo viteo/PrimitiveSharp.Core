@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Text;
 using SixLabors.ImageSharp;
 using SixLabors.Shapes;
@@ -15,7 +16,7 @@ namespace primitive
         ShapeTypeEllipse,
         ShapeTypeCircle,
         ShapeTypeRotatedRectangle,
-        ShapeTypeQuadratic,
+        ShapeTypeBezierQuadratic,
         ShapeTypeRotatedEllipse,
         ShapeTypePolygon
     }
@@ -36,9 +37,14 @@ namespace primitive
         public Worker Worker { get; set; }
         public abstract IShape Copy();
         public abstract IPath GetPath();
-        public abstract void Draw(Image<Rgba32> image, Rgba32 color, double scale);
         public abstract void Mutate();
         public abstract string SVG(string attrs);
+
+        public virtual void Draw(Image<Rgba32> image, Rgba32 color, double scale)
+        {
+            image.Mutate(im => im
+                .Fill(color, GetPath().Transform(Matrix3x2.CreateScale((float)scale))));
+        }
 
         public virtual List<Scanline> Rasterize()
         {
@@ -55,21 +61,20 @@ namespace primitive
             for (int i = bot; i >= top; i--)
             {
                 var n = path.FindIntersections(new PointF(bounds.Left, i), new PointF(bounds.Right, i), interscertions, 0);
-                var x = Util.ClampInt((int)interscertions[0].X, 0, w - 1);
                 if (n == 1)
                 {
                     lines.Add(new Scanline
                     {
                         Alpha = 0xffff,
-                        X1 = x,
-                        X2 = x,
+                        X1 = Util.ClampInt((int)interscertions[0].X, 0, w - 1),
+                        X2 = Util.ClampInt((int)interscertions[0].X, 0, w - 1),
                         Y = i
                     });
                     continue;
                 }
                 if (n == 2)
                 {
-                    var x1 = x;
+                    var x1 = Util.ClampInt((int)interscertions[0].X, 0, w - 1);
                     var x2 = Util.ClampInt((int)interscertions[1].X, 0, w - 1);
                     lines.Add(new Scanline
                     {

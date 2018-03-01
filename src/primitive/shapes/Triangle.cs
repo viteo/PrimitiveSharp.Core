@@ -7,9 +7,8 @@ using SixLabors.Shapes;
 
 namespace primitive
 {
-    public class Triangle : IShape
+    public class Triangle : Shape
     {
-        public Worker Worker { get; set; }
         public int X1 { get; set; }
         public int X2 { get; set; }
         public int X3 { get; set; }
@@ -37,26 +36,17 @@ namespace primitive
             Y1 = y1; Y2 = y2; Y3 = y3;
         }
 
-        public void Draw(Image<Rgba32> image, Rgba32 color, double scale)
-        {
-            PathBuilder pb = new PathBuilder();
-            pb.AddLine(X1, Y1, X2, Y2);
-            pb.AddLine(X2, Y2, X3, Y3);
-            image.Mutate(im => im
-                .Fill(color, pb.Build().Transform(Matrix3x2.CreateScale((float)scale))));
-        }
-
-        public string SVG(string attrs)
+        public override string SVG(string attrs)
         {
             return $"<polygon {attrs} points=\"{X1},{Y1} {X2},{Y2} {X3},{Y3}\" />";
         }
 
-        public IShape Copy()
+        public override IShape Copy()
         {
             return new Triangle(Worker, X1, X2, X3, Y1, Y2, Y3);
         }
 
-        public void Mutate()
+        public override void Mutate()
         {
             var w = Worker.W;
             var h = Worker.H;
@@ -116,7 +106,7 @@ namespace primitive
             return a1 > minDegrees && a2 > minDegrees && a3 > minDegrees;
         }
 
-        public List<Scanline> Rasterize()
+        public override List<Scanline> Rasterize()
         {
             var buf= new List<Scanline>();
             buf = rasterizeTriangle(X1, Y1, X2, Y2, X3, Y3, buf);
@@ -192,8 +182,13 @@ namespace primitive
             return buf;
         }
 
-
-
-
+        public override IPath GetPath()
+        {
+            PathBuilder pb = new PathBuilder();
+            pb.AddLine(X1, Y1, X2, Y2);
+            pb.AddLine(X2, Y2, X3, Y3);
+            pb.AddLine(X3, Y3, X1, Y1);
+            return pb.Build();
+        }
     }
 }
