@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace primitive
+﻿namespace primitive
 {
     public class State : IAnnealable
     {
@@ -44,7 +40,7 @@ namespace primitive
             Shape.Mutate();
             if (MutateAlpha)
             {
-                Alpha = Util.ClampInt(Alpha + rnd.Next(21) - 10, 1, 255);
+                Alpha = Util.Clamp(Alpha + rnd.Next(21) - 10, 1, 255);
             }
             Score = -1;
             return oldState;

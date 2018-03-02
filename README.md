@@ -6,13 +6,11 @@ Reproducing images with geometric primitives.
 
 ### How it Works
 
-A target image is provided as input. The algorithm tries to find the single most optimal shape that can be drawn to minimize the error between the target image and the drawn image. It repeats this process, adding *one shape at a time*. Around 50 to 200 shapes are needed to reach a result that is recognizable yet artistic and abstract.
+A target image is provided as input. The algorithm tries to find the most optimal shape that can be drawn to minimize the error between the target image and the drawn image. It repeats this process, adding *one shape at a time*. Around 50 to 200 shapes are needed to reach a result that is recognizable yet artistic and abstract.
 
-### Primitive for macOS
+### Primitive for .NET
 
-Now available as a native Mac application!
-
-https://primitive.lol/
+Now available as a .NET and .NET Core application!
 
 ### Twitter
 
@@ -25,9 +23,12 @@ You can tweet a picture to the bot and it will process it for you.
 
 ### Command-line Usage
 
-Run it on your own images! First, [install Go](https://golang.org/doc/install).
+Run it on your own images! Compile solution with Visual Studio.
+Dependences: 
+[ImageSharp](https://github.com/SixLabors/ImageSharp) (nightly build)
+[CommandLineUtils](https://github.com/natemcmaster/CommandLineUtils)
 
-    go get -u github.com/fogleman/primitive
+Usage:    
     primitive -i input.png -o output.png -n 100
 
 Small input images should be used (like 256x256px). You don't need the detail anyway and the code will run faster.
@@ -39,7 +40,7 @@ Small input images should be used (like 256x256px). You don't need the detail an
 | `n` | n/a | number of shapes |
 | `m` | 1 | mode: 0=combo, 1=triangle, 2=rect, 3=ellipse, 4=circle, 5=rotatedrect, 6=beziers, 7=rotatedellipse, 8=polygon |
 | `rep` | 0 | add N extra shapes each iteration with reduced search (mostly good for beziers) |
-| `nth` | 1 | save every Nth frame (only when `%d` is in output path) |
+| `nth` | 1 | save every Nth frame (only when `{0}` is in output path) |
 | `r` | 256 | resize large input images to this size before processing |
 | `s` | 1024 | output image size |
 | `a` | 128 | color alpha (use `0` to let the algorithm choose alpha for each shape) |
@@ -55,9 +56,9 @@ Depending on the output filename extension provided, you can produce different t
 - `PNG`: raster output
 - `JPG`: raster output
 - `SVG`: vector output
-- `GIF`: animated output showing shapes being added - requires ImageMagick (specifically the `convert` command)
+- `GIF`: animated output showing shapes being added
 
-For PNG and SVG outputs, you can also include `%d`, `%03d`, etc. in the filename. In this case, each frame will be saved separately.
+For PNG and SVG outputs, you can also include `{0}`, `{0:000}`, etc. in the filename. In this case, each frame will be saved separately.
 
 You can use the `-o` flag multiple times. This way you can save both a PNG and an SVG, for example.
 
@@ -87,10 +88,10 @@ The matrix below shows triangles, ellipses and rectangles at 50, 100 and 200 ite
 
 ### How it Works, Part II
 
-Say we have a `Target Image`. This is what we're working towards recreating. We start with a blank canvas, but we fill it with a single solid color. Currently, this is the average color of the `Target Image`. We call this new blank canvas the `Current Image`. Now, we start evaluating shapes. To evaluate a shape, we draw it on top of the `Current Image`, producing a `New Image`. This `New Image` is compared to the `Target Image` to compute a score. We use the [root-mean-square error](https://en.wikipedia.org/wiki/Root-mean-square_deviation) for the score.
+Say we have a `Target Image`. This is what we're working towards recreating. We start with a blank canvas, but we fill it with a single solid color. Currently, this is the average color of the `Target Image`. We call this new blank canvas the `Current Image`. Now, we start evaluating shapes. To evaluate a shape, we draw it on top of the `Current Image`, producing a `Buffer Image`. This `Buffer Image` is compared to the `Target Image` to compute a score. We use the [root-mean-square error](https://en.wikipedia.org/wiki/Root-mean-square_deviation) for the score.
 
-    Current Image + Shape => New Image
-    RMSE(New Image, Target Image) => Score
+    Current Image + Shape => Buffer Image
+    RMSE(Buffer Image, Target Image) => Score
 
 The shapes are generated randomly. We can generate a random shape and score it. Then we can mutate the shape (by tweaking a triangle vertex, tweaking an ellipse radius or center, etc.) and score it again. If the mutation improved the score, we keep it. Otherwise we rollback to the previous state. Repeating this process is known as [hill climbing](https://en.wikipedia.org/wiki/Hill_climbing). Hill climbing is prone to getting stuck in local minima, so we actually do this many different times with several different starting shapes. We can also generate N random shapes and pick the best one before we start hill climbing. [Simulated annealing](https://en.wikipedia.org/wiki/Simulated_annealing) is another good option, but in my tests I found the hill climbing technique just as good and faster, at least for this particular problem.
 
@@ -102,27 +103,32 @@ The following primitives are supported:
 
 - Triangle
 - Rectangle (axis-aligned)
-- Ellipse (axis-aligned)
-- Circle
 - Rotated Rectangle
+- Ellipse (axis-aligned)
+- Rotated Ellipse
+- Circle
+- Quadratic Bezier
 - Combo (a mix of the above in a single image)
 
 More shapes can be added by implementing the following interface:
 
-```go
-type Shape interface {
-	Rasterize() []Scanline
-	Copy() Shape
-	Mutate()
-	Draw(dc *gg.Context)
-	SVG(attrs string) string
+```csharp
+public interface IShape
+{
+    Worker Worker { get; set; }
+    IShape Copy();
+    IPath GetPath();
+    void Draw(Image<Rgba32> image, Rgba32 color, double scale);
+    void Mutate();
+    string SVG(string attrs);
+    List<Scanline> Rasterize();
 }
 ```
 
 ### Features
 
 - [Hill Climbing](https://en.wikipedia.org/wiki/Hill_climbing) or [Simulated Annealing](https://en.wikipedia.org/wiki/Simulated_annealing) for optimization (hill climbing multiple random shapes is nearly as good as annealing and faster)
-- Scanline rasterization of shapes in pure Go (preferable for implementing the features below)
+- Scanline rasterization of shapes in pure C# (preferable for implementing the features below)
 - Optimal color computation based on affected pixels for each shape (color is directly computed, not optimized for)
 - Partial image difference for faster scoring (only pixels that change need be considered)
 - Anti-aliased output rendering

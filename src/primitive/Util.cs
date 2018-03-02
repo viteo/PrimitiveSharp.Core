@@ -28,14 +28,9 @@ namespace primitive
             image.Save(path);
         }
 
-        public static void SaveGIF(string path, List<Image<Rgba32>> frames, int delay, int lastDelay)
+        public static void SaveGIF(string path, Image<Rgba32> frames, int delay, int lastDelay)
         {
-            throw new NotImplementedException();
-        }
-
-        public static void SaveGIFImageMagick(string path, List<Image<Rgba32>> frames, int delay, int lastDelay)
-        {
-            throw new NotImplementedException();
+            frames.Save(path);
         }
 
         public static string NumberString(double x)
@@ -60,36 +55,15 @@ namespace primitive
             return radians * 180 / Math.PI;
         }
 
-        public static double Clamp(double x, double lo, double hi)
-        {
-            if (x < lo)
-                return lo;
-            if (x > hi)
-                return hi;
-            return x;
-        }
 
-        public static int ClampInt(int x, int lo, int hi)
+        public static T Clamp<T>(T value, T min, T max) where T : IComparable<T>
         {
-            if (x < lo)
-                return lo;
-            if (x > hi)
-                return hi;
-            return x;
-        }
-
-        public static int MinInt(int a, int b)
-        {
-            if (a < b)
-                return a;
-            return b;
-        }
-
-        public static int MaxInt(int a, int b)
-        {
-            if (a > b)
-                return a;
-            return b;
+            T result = value;
+            if (value.CompareTo(max) > 0)
+                result = max;
+            if (value.CompareTo(min) < 0)
+                result = min;
+            return result;
         }
 
         public static (double rx, double ry) Rotate(double x, double y, double theta)

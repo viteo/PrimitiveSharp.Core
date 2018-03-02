@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using SixLabors.ImageSharp;
 
 namespace primitive
@@ -12,7 +11,6 @@ namespace primitive
         public Image<Rgba32> Target { get; set; }
         public Image<Rgba32> Current { get; set; }
         public Image<Rgba32> Buffer { get; set; }
-        //todo Rasterizer
         public List<Scanline> Lines { get; set; }
         public Heatmap Heatmap { get; set; }
         public Random Rnd { get; set; }
@@ -27,7 +25,6 @@ namespace primitive
             H = h;
             Target = target;
             Buffer = new Image<Rgba32>(target.Width, target.Height);
-            //todo Raserizer
             Lines = new List<Scanline>();
             Heatmap = new Heatmap(w, h);
             Rnd = new Random((int)DateTime.Now.Ticks);

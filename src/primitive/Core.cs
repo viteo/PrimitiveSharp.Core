@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
-using System.Text;
 using SixLabors.ImageSharp;
 
 namespace primitive
@@ -27,9 +24,9 @@ namespace primitive
 
             if (count == 0) return Rgba32.Black;
 
-            var r = Util.ClampInt((int)(rsum / count) >> 8, 0, 255);
-            var g = Util.ClampInt((int)(gsum / count) >> 8, 0, 255);
-            var b = Util.ClampInt((int)(bsum / count) >> 8, 0, 255);
+            var r = Util.Clamp((int)(rsum / count) >> 8, 0, 255);
+            var g = Util.Clamp((int)(gsum / count) >> 8, 0, 255);
+            var b = Util.Clamp((int)(bsum / count) >> 8, 0, 255);
 
             return new Rgba32((byte)r, (byte)g, (byte)b, (byte)alpha);
         }

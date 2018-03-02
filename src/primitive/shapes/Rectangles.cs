@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Numerics;
-using System.Text;
-using SixLabors.ImageSharp;
-using SixLabors.Primitives;
+﻿using System.Collections.Generic;
 using SixLabors.Shapes;
-using System.Linq;
 
 namespace primitive
 {
@@ -21,8 +15,8 @@ namespace primitive
             var rnd = worker.Rnd;
             X1 = rnd.Next(worker.W);
             Y1 = rnd.Next(worker.H);
-            X2 = Util.ClampInt(X1 + rnd.Next(32) + 1, 0, worker.W - 1);
-            Y2 = Util.ClampInt(Y1 + rnd.Next(32) + 1, 0, worker.H - 1);
+            X2 = Util.Clamp(X1 + rnd.Next(32) + 1, 0, worker.W - 1);
+            Y2 = Util.Clamp(Y1 + rnd.Next(32) + 1, 0, worker.H - 1);
             Worker = worker;
         }
 
@@ -75,11 +69,11 @@ namespace primitive
             switch (rnd.Next(2))
             {
                 case 0:
-                    X1 = Util.ClampInt(X1 + (int)(rnd.NextGaussian() * 16), 0, w - 1);
-                    Y1 = Util.ClampInt(Y1 + (int)(rnd.NextGaussian() * 16), 0, h - 1); break;
+                    X1 = Util.Clamp(X1 + (int)(rnd.NextGaussian() * 16), 0, w - 1);
+                    Y1 = Util.Clamp(Y1 + (int)(rnd.NextGaussian() * 16), 0, h - 1); break;
                 case 1:
-                    X2 = Util.ClampInt(X2 + (int)(rnd.NextGaussian() * 16), 0, w - 1);
-                    Y2 = Util.ClampInt(Y2 + (int)(rnd.NextGaussian() * 16), 0, h - 1); break;
+                    X2 = Util.Clamp(X2 + (int)(rnd.NextGaussian() * 16), 0, w - 1);
+                    Y2 = Util.Clamp(Y2 + (int)(rnd.NextGaussian() * 16), 0, h - 1); break;
             }
         }
 
@@ -154,18 +148,18 @@ namespace primitive
             switch (rnd.Next(3))
             {
                 case 0:
-                    X = Util.ClampInt(X + (int)(rnd.NextGaussian() * 16), 0, w - 1);
-                    Y = Util.ClampInt(Y + (int)(rnd.NextGaussian() * 16), 0, h - 1); break;
+                    X = Util.Clamp(X + (int)(rnd.NextGaussian() * 16), 0, w - 1);
+                    Y = Util.Clamp(Y + (int)(rnd.NextGaussian() * 16), 0, h - 1); break;
                 case 1:
-                    Sx = Util.ClampInt(Sx + (int)(rnd.NextGaussian() * 16), 0, w - 1);
-                    Sy = Util.ClampInt(Sy + (int)(rnd.NextGaussian() * 16), 0, h - 1); break;
+                    Sx = Util.Clamp(Sx + (int)(rnd.NextGaussian() * 16), 0, w - 1);
+                    Sy = Util.Clamp(Sy + (int)(rnd.NextGaussian() * 16), 0, h - 1); break;
                 case 3:
                     Angle = Angle + (int)(rnd.NextGaussian() * 32); break;
             }
             //while (!Valid())
             //{
-            //    Sx = Util.ClampInt(Sx + (int)(rnd.NextGaussian() * 16), 0, w - 1);
-            //    Sy = Util.ClampInt(Sy + (int)(rnd.NextGaussian() * 16), 0, h - 1);
+            //    Sx = Util.Clamp(Sx + (int)(rnd.NextGaussian() * 16), 0, w - 1);
+            //    Sy = Util.Clamp(Sy + (int)(rnd.NextGaussian() * 16), 0, h - 1);
             //}
         }
 

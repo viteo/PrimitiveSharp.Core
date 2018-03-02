@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Numerics;
-using System.Text;
-using SixLabors.ImageSharp;
 using SixLabors.Shapes;
 
 namespace primitive
@@ -61,16 +58,16 @@ namespace primitive
             switch (rnd.Next(3))
             {
                 case 0:
-                    X = Util.ClampInt(X + (int)(rnd.NextGaussian() * 16), 0, w - 1);
-                    Y = Util.ClampInt(Y + (int)(rnd.NextGaussian() * 16), 0, h - 1);
+                    X = Util.Clamp(X + (int)(rnd.NextGaussian() * 16), 0, w - 1);
+                    Y = Util.Clamp(Y + (int)(rnd.NextGaussian() * 16), 0, h - 1);
                     break;
                 case 1:
-                    Rx = Util.ClampInt(Rx + (int)(rnd.NextGaussian() * 16), 1, w - 1);
+                    Rx = Util.Clamp(Rx + (int)(rnd.NextGaussian() * 16), 1, w - 1);
                     if (IsCircle)
                         Ry = Rx;
                     break;
                 case 2:
-                    Ry = Util.ClampInt(Ry + (int)(rnd.NextGaussian() * 16), 1, h - 1);
+                    Ry = Util.Clamp(Ry + (int)(rnd.NextGaussian() * 16), 1, h - 1);
                     if (IsCircle)
                         Rx = Ry;
                     break;

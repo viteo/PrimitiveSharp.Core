@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Numerics;
 using System.Threading.Tasks;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Processing;
-using SixLabors.Primitives;
 
 namespace primitive
 {
@@ -49,9 +46,7 @@ namespace primitive
             Background = background;
             Target = target;//.Clone();
             Current = Util.UniformRgba(target.Width, target.Height, background);
-
             Result = Util.UniformRgba(Sw, Sh, Background);
-            //Result = Util.UniformRgba(target.Width, target.Height, Background);
 
             Score = Core.DifferenceFull(Target, Current);
             Shapes = new List<IShape>();
@@ -66,11 +61,11 @@ namespace primitive
             }
         }
 
-        public List<Image<Rgba32>> Frames(double scoreDelta)
+        public Image<Rgba32> Frames(double scoreDelta)
         {
-            List<Image<Rgba32>> result = new List<Image<Rgba32>>();
             Image<Rgba32> im = Util.UniformRgba(Sw, Sh, Background);
-            result.Add(im.Clone());
+            Image<Rgba32> result = Util.UniformRgba(Sw, Sh, Background);
+            result.Frames.AddFrame(im.Frames[0]);
             double previous = 10;
             for (int i = 0; i < Shapes.Count; i++)
             {
@@ -81,9 +76,8 @@ namespace primitive
                 if (delta >= scoreDelta)
                 {
                     previous = score;
-                    result.Add(im.Clone());
+                    result.Frames.AddFrame(im.Frames[0]);
                 }
-
             }
             return result;
         }
@@ -91,16 +85,23 @@ namespace primitive
         public string SVG()
         {
             Rgba32 bg = Background;
+            var fillA = Colors[0].A;
+            var vw = Sw / (int)Scale;
+            var vh = Sh / (int)Scale;
             List<string> lines = new List<string>();
-            lines.Add(String.Format("<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"{0}\" height=\"{1}\">", Sw, Sh));
-            lines.Add(String.Format("<rect x=\"0\" y=\"0\" width=\"{0}\" height=\"{1}\" fill=\"#{2:X}{3:X}{4:X}\" />", Sw, Sh, bg.R, bg.G, bg.B));
-            lines.Add(String.Format("<g transform=\"scale({0}) translate(0.5 0.5)\">", Scale));
+            lines.Add(String.Format($"<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 {vw} {vh}\">"));
+            lines.Add(String.Format($"<rect width=\"100%\" height=\"100%\" fill=\"#{bg.R:X2}{bg.G:X2}{bg.B:X2}\" />"));
+            lines.Add(String.Format($"<g fill-opacity=\"{(double)fillA / 255}\">"));
             for (int i = 0; i < Shapes.Count; i++)
             {
+                List<string> attrs = new List<string>();
                 Rgba32 c = Colors[i];
-                string attrs = "fill=\"#{0:X}{1:X}{2:X}\" fill-opacity=\"{3}\"";
-                attrs = String.Format(attrs, c.R, c.G, c.B, (double)c.A / 255);
-                lines.Add(Shapes[i].SVG(attrs));
+                attrs.Add(String.Format($"fill=\"#{c.R:X2}{c.G:X2}{c.B:X2}\""));
+                if (c.A != fillA)
+                {
+                    attrs.Add(String.Format($"fill-opacity=\"{(double)c.A / 255}\""));
+                }
+                lines.Add(Shapes[i].SVG(String.Join(" ", attrs)));
             }
             lines.Add("</g>");
             lines.Add("</svg>");

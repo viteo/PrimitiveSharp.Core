@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Numerics;
-using System.Text;
-using SixLabors.ImageSharp;
 using SixLabors.Shapes;
 
 namespace primitive
@@ -57,16 +54,16 @@ namespace primitive
                 switch (rnd.Next(3))
                 {
                     case 0:
-                        X1 = Util.ClampInt(X1 + (int)(rnd.NextGaussian() * 16), -m, w - 1 + m);
-                        Y1 = Util.ClampInt(Y1 + (int)(rnd.NextGaussian() * 16), -m, h - 1 + m);
+                        X1 = Util.Clamp(X1 + (int)(rnd.NextGaussian() * 16), -m, w - 1 + m);
+                        Y1 = Util.Clamp(Y1 + (int)(rnd.NextGaussian() * 16), -m, h - 1 + m);
                         break;
                     case 1:
-                        X2 = Util.ClampInt(X2 + (int)(rnd.NextGaussian() * 16), -m, w - 1 + m);
-                        Y2 = Util.ClampInt(Y2 + (int)(rnd.NextGaussian() * 16), -m, h - 1 + m);
+                        X2 = Util.Clamp(X2 + (int)(rnd.NextGaussian() * 16), -m, w - 1 + m);
+                        Y2 = Util.Clamp(Y2 + (int)(rnd.NextGaussian() * 16), -m, h - 1 + m);
                         break;
                     case 2:
-                        X3 = Util.ClampInt(X3 + (int)(rnd.NextGaussian() * 16), -m, w - 1 + m);
-                        Y3 = Util.ClampInt(Y3 + (int)(rnd.NextGaussian() * 16), -m, h - 1 + m);
+                        X3 = Util.Clamp(X3 + (int)(rnd.NextGaussian() * 16), -m, w - 1 + m);
+                        Y3 = Util.Clamp(Y3 + (int)(rnd.NextGaussian() * 16), -m, h - 1 + m);
                         break;
                 }
             } while (Valid());

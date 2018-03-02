@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
-using System.Text;
 using SixLabors.ImageSharp;
 using SixLabors.Shapes;
 using SixLabors.Primitives;
@@ -57,8 +56,8 @@ namespace primitive
             PointF[] interscertions = new PointF[path.MaxIntersections];
 
             var bounds = path.Bounds;
-            var bot = Util.ClampInt((int)bounds.Bottom, 0, h - 1);
-            var top = Util.ClampInt((int)bounds.Top, 0, h - 1);
+            var bot = Util.Clamp((int)bounds.Bottom, 0, h - 1);
+            var top = Util.Clamp((int)bounds.Top, 0, h - 1);
 
             for (int y = bot; y >= top; y--)
             {
@@ -71,15 +70,15 @@ namespace primitive
                         lines.Add(new Scanline
                         {
                             Alpha = 0xffff,
-                            X1 = Util.ClampInt((int)interscertions[i].X, 0, w - 1),
-                            X2 = Util.ClampInt((int)interscertions[i + 1].X, 0, w - 1),
+                            X1 = Util.Clamp((int)interscertions[i].X, 0, w - 1),
+                            X2 = Util.Clamp((int)interscertions[i + 1].X, 0, w - 1),
                             Y = y
                         });
                     }
                 }
                 else if (n == 1)
                 {
-                    var x = Util.ClampInt((int)interscertions[0].X, 0, w - 1);
+                    var x = Util.Clamp((int)interscertions[0].X, 0, w - 1);
                     lines.Add(new Scanline
                     {
                         Alpha = 0xffff,

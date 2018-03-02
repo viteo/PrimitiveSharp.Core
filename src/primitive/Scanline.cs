@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace primitive
 {
@@ -22,8 +20,8 @@ namespace primitive
                     continue;
                 if (line.X2 < 0)
                     continue;
-                line.X1 = Util.ClampInt(line.X1, 0, w - 1);
-                line.X2 = Util.ClampInt(line.X2, 0, w - 1);
+                line.X1 = Util.Clamp(line.X1, 0, w - 1);
+                line.X2 = Util.Clamp(line.X2, 0, w - 1);
                 if (line.X1 > line.X2)
                     continue;
                 result.Add(line);

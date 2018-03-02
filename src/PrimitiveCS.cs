@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Dynamic;
 using System.IO;
 using McMaster.Extensions.CommandLineUtils;
 using SixLabors.ImageSharp;
@@ -15,6 +14,7 @@ namespace primitive
 
         public static Random Rand;
 
+        #region InputParameters
         [Required]
         [Option(Description = "Required. Input file.",
             Template = "-i|--input")]
@@ -70,7 +70,7 @@ namespace primitive
         [Option(Description = "Very verbose output",
             Template = "-vv")]
         public bool VeryVerbose { get; }
-
+        #endregion
 
         private void OnExecute()
         {
@@ -136,16 +136,16 @@ namespace primitive
                     // find optimal shape and add it to the model
                     var t = DateTime.Now;
                     var n = model.Step((ShapeType)shapeConfig.Mode, shapeConfig.Alpha, shapeConfig.Repeat);
-                    var nps = Util.NumberString((double)n / (DateTime.Now - t).Seconds);
-                    var elapsed = (DateTime.Now - start).Seconds;
-                    Logger.WriteLine(1, "{0}: t={1:G3}, score={2:G6}, n={3}, n/s={4}", frame, elapsed, model.Score, n, nps);
+                    var nps = Util.NumberString((double)n / (DateTime.Now - t).TotalSeconds);
+                    var elapsed = (DateTime.Now - start).TotalSeconds;
+                    Logger.WriteLine(1, "{0:00}: t={1:G3}, score={2:G6}, n={3}, n/s={4}", frame, elapsed, model.Score, n, nps);
 
                     // write output image(s)
                     foreach (var outFile in Parameters.OutputFiles.FileList)
                     {
                         var ext = Path.GetExtension(outFile).ToLower();
-                        var percent = outFile.Contains("%");
-                        var saveFrames = percent && ext.Equals(".gif");
+                        bool percent = outFile.Contains("{");
+                        bool saveFrames = percent && !ext.Equals(".gif");
                         saveFrames = saveFrames && frame % Parameters.Nth == 0;
                         var last = j == Parameters.ShapeConfigs.ConfigList.Count - 1 && i == shapeConfig.Count - 1;
                         if (saveFrames || last)
@@ -157,7 +157,6 @@ namespace primitive
                             switch (ext)
                             {
                                 case ".png":
-                                    //model.Current.Save(@"c:\temp\owl_ocurr.png");
                                     Util.SavePNG(path, model.Result); break;
                                 case ".jpg": case ".jpeg":
                                     Util.SaveJPG(path, model.Result, 95); break;
@@ -165,7 +164,7 @@ namespace primitive
                                     Util.SaveFile(path, model.SVG()); break;
                                 case ".gif":
                                     var frames = model.Frames(0.001);
-                                    Util.SaveGIFImageMagick(path, frames, 50, 250); break;
+                                    Util.SaveGIF(path, frames, 50, 250); break;
                                 default:
                                     throw new Exception("unrecognized file extension: " + ext);
                             }

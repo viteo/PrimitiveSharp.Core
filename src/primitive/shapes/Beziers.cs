@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Numerics;
-using System.Text;
-using SixLabors.ImageSharp;
-using SixLabors.Primitives;
+﻿using SixLabors.Primitives;
 using SixLabors.Shapes;
 
 namespace primitive
