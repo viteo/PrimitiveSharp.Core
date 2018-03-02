@@ -77,12 +77,18 @@ namespace primitive
             // parse and validate arguments
             Parameters.InputFile = Input;
             foreach (var output in OutputFiles.Split(' '))
-                Parameters.OutputFiles.FileList.Add(output);
+                Parameters.OutputFiles.Add(output);
             Parameters.Mode = Mode ?? 1;
             Parameters.Alpha = Alpha ?? 128;
             Parameters.Repeat = Repeat ?? 0;
             foreach (var nprim in Nprimitives.Split(' '))
-                Parameters.ShapeConfigs.Set(nprim);
+                Parameters.ShapeConfigs.Add(new ShapeConfig
+                {
+                    Count = int.Parse(nprim),
+                    Mode = Parameters.Mode,
+                    Alpha = Parameters.Alpha,
+                    Repeat = Parameters.Repeat
+                });
             Parameters.Nth = NthFrame ?? 1;
             Parameters.InputResize = InputResize ?? 256;
             Parameters.OutputSize = OutputSize ?? 1024;
@@ -104,9 +110,7 @@ namespace primitive
 
             // read input image
             Logger.WriteLine(1, "reading {0}", Parameters.InputFile);
-            Image<Rgba32> inputImage;
-            inputImage = Util.LoadImage(Parameters.InputFile);
-
+            Image<Rgba32> inputImage = Util.LoadImage(Parameters.InputFile);
 
             // scale down input image if needed
             if (Parameters.InputResize > 0)
@@ -118,15 +122,14 @@ namespace primitive
                 bgColor = Util.AverageImageColor(inputImage);
             else
                 bgColor = Rgba32.FromHex(Parameters.Background);
-
-
+            
             // run algorithm
             Model model = new Model(inputImage, bgColor, Parameters.OutputSize, Parameters.Workers);
             Logger.WriteLine(1, "{0}: t={1:G3}, score={2:G6}", 0, 0.0, model.Score);
             var start = DateTime.Now;
             int frame = 0, j = 0;
 
-            foreach (var shapeConfig in Parameters.ShapeConfigs.ConfigList)
+            foreach (var shapeConfig in Parameters.ShapeConfigs)
             {
                 Logger.WriteLine(1, "count={0}, mode={1}, alpha={2}, repeat={3}", shapeConfig.Count, shapeConfig.Mode, shapeConfig.Alpha, shapeConfig.Repeat);
                 for (int i = 0; i < shapeConfig.Count; i++)
@@ -141,13 +144,13 @@ namespace primitive
                     Logger.WriteLine(1, "{0:00}: t={1:G3}, score={2:G6}, n={3}, n/s={4}", frame, elapsed, model.Score, n, nps);
 
                     // write output image(s)
-                    foreach (var outFile in Parameters.OutputFiles.FileList)
+                    foreach (var outFile in Parameters.OutputFiles)
                     {
                         var ext = Path.GetExtension(outFile).ToLower();
-                        bool percent = outFile.Contains("{");
+                        bool percent = outFile.Contains("{0");
                         bool saveFrames = percent && !ext.Equals(".gif");
                         saveFrames = saveFrames && frame % Parameters.Nth == 0;
-                        var last = j == Parameters.ShapeConfigs.ConfigList.Count - 1 && i == shapeConfig.Count - 1;
+                        var last = j == Parameters.ShapeConfigs.Count - 1 && i == shapeConfig.Count - 1;
                         if (saveFrames || last)
                         {
                             var path = outFile;
@@ -171,6 +174,7 @@ namespace primitive
                         }
                     }
                 }
+                j++;
             }
             Console.WriteLine("End");
         }
@@ -179,8 +183,8 @@ namespace primitive
     public static class Parameters
     {
         public static string InputFile;
-        public static OutputFileArray OutputFiles = new OutputFileArray();
-        public static ShapeConfigArray ShapeConfigs = new ShapeConfigArray();
+        public static List<string> OutputFiles = new List<string>();
+        public static List<ShapeConfig> ShapeConfigs = new List<ShapeConfig>();
         public static int Mode;
         public static int Alpha;
         public static int Repeat;
@@ -192,58 +196,11 @@ namespace primitive
         public static int LogLevel;
     }
 
-    public struct shapeConfig
+    public struct ShapeConfig
     {
         public int Count { get; set; }
         public int Mode { get; set; }
         public int Alpha { get; set; }
         public int Repeat { get; set; }
-
-        public shapeConfig(int count, int mode, int alpha, int repeat)
-        {
-            Count = count;
-            Mode = mode;
-            Alpha = alpha;
-            Repeat = repeat;
-        }
-    }
-
-    public class ShapeConfigArray
-    {
-        public List<shapeConfig> ConfigList = new List<shapeConfig>();
-
-        public override string ToString()
-        {
-            return "";
-        }
-
-        public void Set(string value)
-        {
-            int n = Int32.Parse(value);
-            Set(n);
-        }
-
-        public void Set(int value)
-        {
-            int n = value;
-            shapeConfig config = new shapeConfig(n, Parameters.Mode, Parameters.Alpha, Parameters.Repeat);
-            ConfigList.Add(config);
-        }
-    }
-
-    //FlagArray
-    public class OutputFileArray
-    {
-        public List<string> FileList = new List<string>();
-
-        public override string ToString()
-        {
-            return string.Join(", ", FileList);
-        }
-
-        public void Set(string value)
-        {
-            FileList.Add(value);
-        }
     }
 }
