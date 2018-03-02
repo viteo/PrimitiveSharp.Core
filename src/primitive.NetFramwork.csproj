@@ -69,7 +69,6 @@
     <Compile Include="primitive\Logger.cs" />
     <Compile Include="primitive\Model.cs" />
     <Compile Include="primitive\Optimize.cs" />
-    <Compile Include="primitive\Raster.cs" />
     <Compile Include="primitive\Scanline.cs" />
     <Compile Include="primitive\shapes\Beziers.cs" />
     <Compile Include="primitive\shapes\Ellipses.cs" />

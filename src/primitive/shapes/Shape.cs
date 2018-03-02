@@ -34,6 +34,7 @@ namespace primitive
 
     public abstract class Shape : IShape
     {
+        private static readonly Comparer<PointF> comparer = Comparer<PointF>.Create((a, b) => a.X.CompareTo(b.X));
         public Worker Worker { get; set; }
         public abstract IShape Copy();
         public abstract IPath GetPath();
@@ -58,34 +59,35 @@ namespace primitive
             var bounds = path.Bounds;
             var bot = Util.ClampInt((int)bounds.Bottom, 0, h - 1);
             var top = Util.ClampInt((int)bounds.Top, 0, h - 1);
-            for (int i = bot; i >= top; i--)
+
+            for (int y = bot; y >= top; y--)
             {
-                var n = path.FindIntersections(new PointF(bounds.Left, i), new PointF(bounds.Right, i), interscertions, 0);
-                var x = Util.ClampInt((int)interscertions[0].X, 0, w - 1);
-                if (n == 1)
+                var n = path.FindIntersections(new PointF(bounds.Left, y), new PointF(bounds.Right, y), interscertions, 0);
+                Array.Sort<PointF>(interscertions, 0, n, comparer);
+                if (n % 2 == 0 && n > 1)
                 {
+                    for (int i = 0; i < n; i += 2)
+                    {
+                        lines.Add(new Scanline
+                        {
+                            Alpha = 0xffff,
+                            X1 = Util.ClampInt((int)interscertions[i].X, 0, w - 1),
+                            X2 = Util.ClampInt((int)interscertions[i + 1].X, 0, w - 1),
+                            Y = y
+                        });
+                    }
+                }
+                else if (n == 1)
+                {
+                    var x = Util.ClampInt((int)interscertions[0].X, 0, w - 1);
                     lines.Add(new Scanline
                     {
                         Alpha = 0xffff,
                         X1 = x,
                         X2 = x,
-                        Y = i
-                    });
-                    continue;
-                }
-                if (n == 2)
-                {
-                    var x1 = x;
-                    var x2 = Util.ClampInt((int)interscertions[1].X, 0, w - 1);
-                    lines.Add(new Scanline
-                    {
-                        Alpha = 0xffff,
-                        X1 = Math.Min(x1, x2),
-                        X2 = Math.Max(x1, x2),
-                        Y = i
+                        Y = y
                     });
                 }
-                //todo something for complex shapes
             }
             return lines;
         }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Text;
 using SixLabors.ImageSharp;
 using SixLabors.Primitives;
@@ -33,7 +34,7 @@ namespace primitive
                 X = P2.X + (float)rnd.NextDouble() * 40 - 20,
                 Y = P2.Y + (float)rnd.NextDouble() * 40 - 20
             };
-            Width = 1.0f / 2;
+            Width = 1f / 2;
         }
 
         public BezierQuadratic(Worker worker, PointF p1, PointF p2, PointF p3, float w)
@@ -54,7 +55,7 @@ namespace primitive
         {
             PathBuilder pb = new PathBuilder();
             pb.AddBezier(P1, P2, P3);
-            return pb.Build();
+            return pb.Build().GenerateOutline(Width);
         }
 
         public override void Mutate()
@@ -92,53 +93,7 @@ namespace primitive
                     break;
             }
         }
-
-        public override void Draw(Image<Rgba32> image, Rgba32 color, double scale)
-        {
-            //Draw quadratic beizer is not yet available in ImageSharp, so lets draw cubic as quadratic
-            PointF pm1 = new PointF
-            {
-                X = (P2.X - P1.X)*2f/3f + P1.X,
-                Y = (P2.Y - P1.Y)*2f/3f + P1.Y,
-            };
-            PointF pm2 = new PointF
-            {
-                X = (P2.X - P3.X) * 2f / 3f + P3.X,
-                Y = (P2.Y - P3.Y) * 2f / 3f + P3.Y,
-            };
-            image.Mutate(im => im
-            .DrawBeziers(color,Width,new[]{P1,pm1,pm2,P3}));
-        }
-
-        public override List<Scanline> Rasterize()
-        {
-            List<Scanline> lines = new List<Scanline>();
-            var w = Worker.W;
-            var h = Worker.H;
-            var path = GetPath();
-            PointF[] interscertions = new PointF[path.MaxIntersections];
-
-            var bounds = path.Bounds;
-            var bot = Util.ClampInt((int)bounds.Bottom, 0, h - 1);
-            var top = Util.ClampInt((int)bounds.Top, 0, h - 1);
-            for (int i = bot; i >= top; i--)
-            {
-                var n = path.FindIntersections(new PointF(bounds.Left, i), new PointF(bounds.Right, i), interscertions, 0);
-                for(int l = 0; l <n ; l++)
-                {
-                    var x = Util.ClampInt((int)interscertions[0].X, 0, w - 1);
-                    lines.Add(new Scanline
-                    {
-                        Alpha = 0xffff,
-                        X1 = x,
-                        X2 = x,
-                        Y = i
-                    });
-                }
-            }
-            return lines;
-        }
-
+        
         public override string SVG(string attrs)
         {
             attrs = attrs.Replace("fill", "stroke");
