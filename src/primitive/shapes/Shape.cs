@@ -9,16 +9,17 @@ namespace primitive
 {
     public enum ShapeType
     {
-        ShapeTypeAny = 0,
-        ShapeTypeTriangle,
-        ShapeTypeRectangle,
-        ShapeTypeEllipse,
-        ShapeTypeCircle,
-        ShapeTypeRotatedRectangle,
-        ShapeTypeBezierQuadratic,
-        ShapeTypeRotatedEllipse,
-        ShapeTypePolygon,
-        ShapeTypePentagram
+        Any = 0,
+        Triangle,
+        Rectangle,
+        Ellipse,
+        Circle,
+        RotatedRectangle,
+        BezierQuadratic,
+        RotatedEllipse,
+        Polygon,
+        Pentagram,
+        Hexagram
     }
 
     public interface IShape

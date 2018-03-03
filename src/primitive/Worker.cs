@@ -4,7 +4,7 @@ using SixLabors.ImageSharp;
 
 namespace primitive
 {
-    public class Worker
+    public class Worker : IDisposable
     {
         public int W { get; set; }
         public int H { get; set; }
@@ -92,28 +92,33 @@ namespace primitive
             {
                 default:
                     return RandomState((ShapeType)(Rnd.Next(8) + 1), a);
-                case ShapeType.ShapeTypeTriangle:
+                case ShapeType.Triangle:
                     return new State(this, new Triangle(this), a);
-                case ShapeType.ShapeTypeRectangle:
+                case ShapeType.Rectangle:
                     return new State(this, new RectangleStraight(this), a);
-                case ShapeType.ShapeTypeEllipse:
+                case ShapeType.Ellipse:
                     return new State(this, new EllipseStrait(this, false), a);
-                case ShapeType.ShapeTypeCircle:
+                case ShapeType.Circle:
                     return new State(this, new EllipseStrait(this, true), a);
-                case ShapeType.ShapeTypeRotatedRectangle:
+                case ShapeType.RotatedRectangle:
                     return new State(this, new RectangleRotated(this), a);
-                case ShapeType.ShapeTypeBezierQuadratic:
+                case ShapeType.BezierQuadratic:
                     return new State(this, new BezierQuadratic(this), a);
-                case ShapeType.ShapeTypeRotatedEllipse:
+                case ShapeType.RotatedEllipse:
                     return new State(this, new EllipseRotated(this), a);
-                case ShapeType.ShapeTypePolygon:
+                case ShapeType.Polygon:
                     return new State(this, new Polygon(this, 4, false), a);
-                case ShapeType.ShapeTypePentagram:
-                    return new State(this, new Pentagram(this), a);
+                case ShapeType.Pentagram:
+                    return new State(this, new StarRegular(this, StarType.Pentagram), a);
+                case ShapeType.Hexagram:
+                    return new State(this,new StarRegular(this, StarType.Hexagram), a );
             }
         }
 
-
-
+        public void Dispose()
+        {
+            Current?.Dispose();
+            Buffer?.Dispose();
+        }
     }
 }

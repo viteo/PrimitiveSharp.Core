@@ -7,14 +7,21 @@ using SixLabors.Shapes;
 
 namespace primitive
 {
-    public class Pentagram : Shape
+    public enum StarType
+    {
+        Pentagram = 5,
+        Hexagram
+    }
+
+    public class StarRegular : Shape
     {
         public PointF Center { get; set; }
         public double Angle { get; set; }
         public double Radius { get; set; }
-        private const int sides = 5;
+        public StarType Type { get; set; }
+        private double Ratio { get; set; }
 
-        public Pentagram(Worker worker)
+        public StarRegular(Worker worker, StarType type) : this(type)
         {
             Worker = worker;
             var rnd = Worker.Rnd;
@@ -27,7 +34,7 @@ namespace primitive
             Angle = rnd.NextDouble() * 360;
         }
 
-        public Pentagram(Worker worker, PointF center, double angle, double radius)
+        public StarRegular(Worker worker, PointF center, double angle, double radius, StarType type) : this(type)
         {
             Worker = worker;
             Center = center;
@@ -35,18 +42,28 @@ namespace primitive
             Radius = radius;
         }
 
+        public StarRegular(StarType type)
+        {
+            Type = type;
+            switch (Type)
+            {
+                case StarType.Pentagram: Ratio = 2.618; break;
+                case StarType.Hexagram: Ratio = 1.732; break;
+            }
+        }
+
         public override IShape Copy()
         {
-            return new Pentagram(Worker, Center, Angle, Radius);
+            return new StarRegular(Worker, Center, Angle, Radius, Type);
         }
 
         public override IPath GetPath()
         {
-            var pExt = PolygonRegular.CalculateVertices(sides, Radius, Angle, Center);
-            var pInt = PolygonRegular.CalculateVertices(sides, Radius / 2.618, Angle + 360/2d/sides, Center);
+            var pExt = PolygonRegular.CalculateVertices((int)Type, Radius, Angle, Center);
+            var pInt = PolygonRegular.CalculateVertices((int)Type, Radius / Ratio, Angle + 360 / 2d / (int)Type, Center);
 
             PathBuilder pb = new PathBuilder();
-            for (int i = 0; i < sides; i++)
+            for (int i = 0; i < (int)Type; i++)
                 pb.AddLines(pExt[i], pInt[i]);
             pb.CloseFigure();
             return pb.Build();
@@ -66,7 +83,7 @@ namespace primitive
                         Y = (float)Util.Clamp(Center.Y + rnd.NextGaussian() * 16, 0, h - 1)
                     }; break;
                 case 1:
-                    Radius = Util.Clamp(Radius + rnd.NextGaussian() * 16, 1, Math.Min(w,h) - 1); break;
+                    Radius = Util.Clamp(Radius + rnd.NextGaussian() * 16, 1, Math.Min(w, h) - 1); break;
                 case 2:
                     Angle = Angle + rnd.NextGaussian() * 32; break;
             }
@@ -74,13 +91,9 @@ namespace primitive
 
         public override string SVG(string attrs)
         {
+            //todo hexagon
             var p = PolygonRegular.CalculateVertices(5, Radius, Angle, Center);
             return $"<polygon {attrs} points=\"{p[0].X},{p[0].Y} {p[2].X},{p[2].Y} {p[4].X},{p[4].Y} {p[1].X},{p[1].Y} {p[3].X},{p[3].Y}\" />";
         }
     }
-
-    //public class Hexagram : Shape
-    //{
-        
-    //}
 }

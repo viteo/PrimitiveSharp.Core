@@ -8,10 +8,10 @@ namespace primitive
     public class Heatmap
     {
         private int H, W;
-        private UInt64[] count;
+        private ulong[] count;
 
         //NewHeatmap
-        public Heatmap(int h, int w)
+        public Heatmap(int w, int h)
         {
             H = h;
             W = w;
@@ -31,7 +31,7 @@ namespace primitive
                 int i = line.Y * W + line.X1;
                 for (var x = line.X1; x <= line.X2; x++)
                 {
-                    count[i] += (uint)line.Alpha;
+                    count[i] += (ulong)line.Alpha;
                     i++;
                 }
             }
