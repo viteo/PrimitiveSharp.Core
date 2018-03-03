@@ -97,7 +97,7 @@ namespace primitive
                 case ShapeType.ShapeTypeRectangle:
                     return new State(this, new RectangleStraight(this), a);
                 case ShapeType.ShapeTypeEllipse:
-                    return new State(this, new EllipseStrait(this,false), a);
+                    return new State(this, new EllipseStrait(this, false), a);
                 case ShapeType.ShapeTypeCircle:
                     return new State(this, new EllipseStrait(this, true), a);
                 case ShapeType.ShapeTypeRotatedRectangle:
@@ -108,6 +108,8 @@ namespace primitive
                     return new State(this, new EllipseRotated(this), a);
                 case ShapeType.ShapeTypePolygon:
                     return new State(this, new Polygon(this, 4, false), a);
+                case ShapeType.ShapeTypePentagram:
+                    return new State(this, new Pentagram(this), a);
             }
         }
 

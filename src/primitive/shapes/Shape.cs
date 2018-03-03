@@ -17,7 +17,8 @@ namespace primitive
         ShapeTypeRotatedRectangle,
         ShapeTypeBezierQuadratic,
         ShapeTypeRotatedEllipse,
-        ShapeTypePolygon
+        ShapeTypePolygon,
+        ShapeTypePentagram
     }
 
     public interface IShape
