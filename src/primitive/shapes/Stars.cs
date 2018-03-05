@@ -15,6 +15,7 @@ namespace primitive
             {
                 switch (Vertices)
                 {
+                    case 4: 
                     case 5: return 2.618;
                     case 6: return 1.732;
                     default: throw new ArgumentException("Other stars are not implemented");

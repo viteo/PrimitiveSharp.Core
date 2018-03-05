@@ -116,6 +116,8 @@ namespace primitive
                     return new State(this, new PolygonRegular(this, 6), a);
                 case ShapeType.Octagon:
                     return new State(this, new PolygonRegular(this, 7), a);
+                case ShapeType.FourPointedStar:
+                    return new State(this, new StarRegular(this, 4), a);
                 case ShapeType.Pentagram:
                     return new State(this, new StarRegular(this, 5), a);
                 case ShapeType.Hexagram:

@@ -40,7 +40,7 @@ Small input images should be used (like 256x256px). You don't need the detail an
 | `i` | n/a | input file |
 | `o` | n/a | output file |
 | `n` | n/a | number of shapes |
-| `m` | 1 | mode: <br>0=combo, <br>1=Triangle, <br>2=Rectangle, <br>3=Rotated Rectangle, <br>4=Ellipse, <br>5=Rotated Ellipse, <br>6=Circle, <br>7=Bezier Quadratic, <br>8=Quadrilateral, <br>9=Square, <br>10=Pentagon, <br>11=Hexagon, <br>12=Octagon, <br>13=Pentagram, <br>14=Hexagram |
+| `m` | 1 | mode: <br>0=combo, <br>1=Triangle, <br>2=Rectangle, <br>3=Rotated Rectangle, <br>4=Ellipse, <br>5=Rotated Ellipse, <br>6=Circle, <br>7=Bezier Quadratic, <br>8=Quadrilateral, <br>9=Square, <br>10=Pentagon, <br>11=Hexagon, <br>12=Octagon, <br>13=Four-pointed star, <br>14=Pentagram, <br>15=Hexagram |
 | `rep` | 0 | add N extra shapes each iteration with reduced search (mostly good for beziers) |
 | `nth` | 1 | save every Nth frame (only when `{0}` is in output path) |
 | `r` | 256 | resize large input images to this size before processing |
@@ -112,7 +112,7 @@ The following primitives are supported:
 - Quadratic Bezier
 - Quadrilateral
 - Regular Polygons (Square, Pentagon, Hexagon, Octagon)
-- Regular Stars (Pentagram, Hexagram)
+- Regular Stars (Four-Pointed star, Pentagram, Hexagram)
 - Combo (a mix of the above in a single image)
 
 More shapes can be added by implementing the following interface:

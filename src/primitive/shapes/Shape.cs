@@ -22,6 +22,7 @@ namespace primitive
         Pentagon,
         Hexagon,
         Octagon,
+        FourPointedStar,
         Pentagram,
         Hexagram
     }
