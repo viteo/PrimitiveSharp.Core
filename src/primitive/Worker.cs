@@ -93,7 +93,7 @@ namespace primitive
                 default:
                     return RandomState((ShapeType)(Rnd.Next(8) + 1), a);
                 case ShapeType.Triangle:
-                    return new State(this, new Triangle(this), a);
+                    return new State(this, new Polygon(this, 3, false), a);
                 case ShapeType.Rectangle:
                     return new State(this, new RectangleStraight(this), a);
                 case ShapeType.Ellipse:
@@ -106,7 +106,7 @@ namespace primitive
                     return new State(this, new BezierQuadratic(this), a);
                 case ShapeType.RotatedEllipse:
                     return new State(this, new EllipseRotated(this), a);
-                case ShapeType.Polygon:
+                case ShapeType.Quadrilateral:
                     return new State(this, new Polygon(this, 4, false), a);
                 case ShapeType.Square:
                     return new State(this, new PolygonRegular(this, 4), a);

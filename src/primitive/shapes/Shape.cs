@@ -17,7 +17,7 @@ namespace primitive
         RotatedEllipse,
         Circle,
         BezierQuadratic,
-        Polygon,
+        Quadrilateral,
         Square,
         Pentagon,
         Hexagon,
