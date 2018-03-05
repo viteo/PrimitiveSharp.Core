@@ -76,7 +76,6 @@
     <Compile Include="primitive\shapes\Rectangles.cs" />
     <Compile Include="primitive\shapes\Shape.cs" />
     <Compile Include="primitive\shapes\Stars.cs" />
-    <Compile Include="primitive\shapes\Triangle.cs" />
     <Compile Include="primitive\State.cs" />
     <Compile Include="primitive\Util.cs" />
     <Compile Include="primitive\Worker.cs" />

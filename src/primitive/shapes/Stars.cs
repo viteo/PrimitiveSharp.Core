@@ -17,7 +17,7 @@ namespace primitive
                 {
                     case 5: return 2.618;
                     case 6: return 1.732;
-                    default: throw new ArgumentException("Other stars not implemented");
+                    default: throw new ArgumentException("Other stars are not implemented");
                 }
             }
         }
