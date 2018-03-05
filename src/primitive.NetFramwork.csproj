@@ -72,9 +72,10 @@
     <Compile Include="primitive\Scanline.cs" />
     <Compile Include="primitive\shapes\Beziers.cs" />
     <Compile Include="primitive\shapes\Ellipses.cs" />
-    <Compile Include="primitive\shapes\Polygon.cs" />
+    <Compile Include="primitive\shapes\Polygons.cs" />
     <Compile Include="primitive\shapes\Rectangles.cs" />
     <Compile Include="primitive\shapes\Shape.cs" />
+    <Compile Include="primitive\shapes\Stars.cs" />
     <Compile Include="primitive\shapes\Triangle.cs" />
     <Compile Include="primitive\State.cs" />
     <Compile Include="primitive\Util.cs" />

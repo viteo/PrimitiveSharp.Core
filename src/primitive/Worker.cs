@@ -108,10 +108,18 @@ namespace primitive
                     return new State(this, new EllipseRotated(this), a);
                 case ShapeType.Polygon:
                     return new State(this, new Polygon(this, 4, false), a);
+                case ShapeType.Square:
+                    return new State(this, new PolygonRegular(this, 4), a);
+                case ShapeType.Pentagon:
+                    return new State(this, new PolygonRegular(this, 5), a);
+                case ShapeType.Hexagon:
+                    return new State(this, new PolygonRegular(this, 6), a);
+                case ShapeType.Octagon:
+                    return new State(this, new PolygonRegular(this, 7), a);
                 case ShapeType.Pentagram:
-                    return new State(this, new StarRegular(this, StarType.Pentagram), a);
+                    return new State(this, new StarRegular(this, 5), a);
                 case ShapeType.Hexagram:
-                    return new State(this,new StarRegular(this, StarType.Hexagram), a );
+                    return new State(this, new StarRegular(this, 6), a);
             }
         }
 
