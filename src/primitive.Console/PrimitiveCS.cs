@@ -7,7 +7,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using primitive.Core;
 
-namespace primitive
+namespace primitive.Console
 {
     [HelpOption]
     class PrimitiveCS
