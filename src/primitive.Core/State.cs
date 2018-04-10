@@ -1,4 +1,4 @@
-﻿namespace primitive
+﻿namespace primitive.Core
 {
     public class State : IAnnealable
     {

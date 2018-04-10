@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using SixLabors.Primitives;
 using SixLabors.Shapes;
 
-namespace primitive
+namespace primitive.Core
 {
     public class Polygon : Shape
     {

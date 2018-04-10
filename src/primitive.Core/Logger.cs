@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace primitive
+namespace primitive.Core
 {
     public static class Logger
     {

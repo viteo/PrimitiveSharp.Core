@@ -5,6 +5,7 @@ using System.IO;
 using McMaster.Extensions.CommandLineUtils;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
+using primitive.Core;
 
 namespace primitive
 {
@@ -12,8 +13,6 @@ namespace primitive
     class PrimitiveCS
     {
         static void Main(string[] args) => CommandLineApplication.Execute<PrimitiveCS>(args);
-
-        public static Random Rand;
 
         #region InputParameters
         [Required]
@@ -102,9 +101,6 @@ namespace primitive
             if (VeryVerbose)
                 Parameters.LogLevel = 2;
 
-            // seed random number generator
-            Rand = new Random((int)DateTime.Now.Ticks);
-
             // determine worker count
             if (Parameters.Workers < 1)
                 Parameters.Workers = Environment.ProcessorCount;
@@ -179,29 +175,5 @@ namespace primitive
             }
             Console.WriteLine("End");
         }
-    }
-
-    public static class Parameters
-    {
-        public static string InputFile;
-        public static List<string> OutputFiles = new List<string>();
-        public static List<ShapeConfig> ShapeConfigs = new List<ShapeConfig>();
-        public static int Mode;
-        public static int Alpha;
-        public static int Repeat;
-        public static string Background;
-        public static int InputResize;
-        public static int OutputSize;
-        public static int Workers;
-        public static int Nth;
-        public static int LogLevel;
-    }
-
-    public struct ShapeConfig
-    {
-        public int Count { get; set; }
-        public int Mode { get; set; }
-        public int Alpha { get; set; }
-        public int Repeat { get; set; }
     }
 }

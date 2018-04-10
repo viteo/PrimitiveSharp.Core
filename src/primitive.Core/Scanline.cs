@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace primitive
+namespace primitive.Core
 {
     public class Scanline
     {

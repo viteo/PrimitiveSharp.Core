@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
-namespace primitive
+namespace primitive.Core
 {
     public class Heatmap
     {

@@ -6,7 +6,7 @@ using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Processing.Drawing;
 using SixLabors.ImageSharp.Processing.Transforms;
 
-namespace primitive
+namespace primitive.Core
 {
     public static class Util
     {

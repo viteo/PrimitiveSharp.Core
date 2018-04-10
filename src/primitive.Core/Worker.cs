@@ -4,7 +4,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.Primitives;
 
-namespace primitive
+namespace primitive.Core
 {
     public class Worker : IDisposable
     {

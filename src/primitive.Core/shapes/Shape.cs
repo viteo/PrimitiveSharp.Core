@@ -8,7 +8,7 @@ using SixLabors.ImageSharp.Processing.Drawing;
 using SixLabors.Shapes;
 using SixLabors.Primitives;
 
-namespace primitive
+namespace primitive.Core
 {
     public enum ShapeType
     {

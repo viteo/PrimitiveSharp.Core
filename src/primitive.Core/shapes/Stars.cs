@@ -4,7 +4,7 @@ using System.Text;
 using SixLabors.Primitives;
 using SixLabors.Shapes;
 
-namespace primitive
+namespace primitive.Core
 {
 
     public class StarRegular : PolygonRegular

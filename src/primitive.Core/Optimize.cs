@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace primitive
+namespace primitive.Core
 {
     public interface IAnnealable
     {
@@ -12,6 +12,8 @@ namespace primitive
 
     public static class Optimize
     {
+        private static Random Rand = new Random((int)DateTime.Now.Ticks);
+
         public static IAnnealable HillClimb(IAnnealable state, int maxAge)
         {
             state = state.Copy();
@@ -67,7 +69,7 @@ namespace primitive
                 var undo = state.DoMove();
                 var energy = state.Energy();
                 var change = energy - previousEnergy;
-                if(change > 0 && Math.Exp(-change/temp) < PrimitiveCS.Rand.NextDouble())
+                if(change > 0 && Math.Exp(-change/temp) < Rand.NextDouble())
                     state.UndoMove(undo);
                 else
                 {
