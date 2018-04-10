@@ -26,7 +26,7 @@ You can tweet a picture to the bot and it will process it for you.
 Run it on your own images! Compile solution with Visual Studio.
 Dependences: 
 
-[ImageSharp](https://github.com/SixLabors/ImageSharp) (nightly build)
+[ImageSharp](https://github.com/SixLabors/ImageSharp)
 
 [CommandLineUtils](https://github.com/natemcmaster/CommandLineUtils)
 
