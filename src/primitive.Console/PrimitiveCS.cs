@@ -173,7 +173,7 @@ namespace primitive.Console
                 }
                 j++;
             }
-            Console.WriteLine("End");
+            System.Console.WriteLine("End");
         }
     }
 }
