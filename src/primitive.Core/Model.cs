@@ -62,7 +62,44 @@ namespace primitive.Core
             }
         }
 
-        public Image<Rgba32> Frames(double scoreDelta)
+        // run algorithm
+        public void RunModel()
+        {
+            Logger.WriteLine(1, "{0}: t={1:G3}, score={2:G6}", 0, 0.0, Score);
+            var start = DateTime.Now;
+            int frame = 0;
+
+            Logger.WriteLine(1, "count={0}, mode={1}, alpha={2}, repeat={3}", Parameters.Nprimitives, Parameters.Mode, Parameters.Alpha, Parameters.Repeat);
+            for (int i = 0; i < Parameters.Nprimitives; i++)
+            {
+                frame++;
+                // find optimal shape and add it to the model
+                var t = DateTime.Now;
+                var n = Step((ShapeType)Parameters.Mode, Parameters.Alpha, Parameters.Repeat);
+                var nps = Util.NumberString((double)n / (DateTime.Now - t).TotalSeconds);
+                var elapsed = (DateTime.Now - start).TotalSeconds;
+                Logger.WriteLine(1, "{0:00}: t={1:G3}, score={2:G6}, n={3}, n/s={4}", frame, elapsed, Score, n, nps);
+            }
+        }
+
+        public List<Image<Rgba32>> GetFrames(bool saveFrames, int Nth = 1)
+        {
+            if (!saveFrames)
+                return new List<Image<Rgba32>> { Result };
+            Image<Rgba32> im = Util.UniformRgba(Sw, Sh, Background);
+            var result = new List<Image<Rgba32>>();
+            for (int i = 0; i < Shapes.Count; i++)
+            {
+                if (i % Nth != 0)
+                    continue;
+                Rgba32 c = Colors[i];
+                Shapes[i].Draw(im, c, Scale);
+                result.Add(im.Clone());
+            }
+            return result;
+        }
+
+        public Image<Rgba32> GetFrames(double scoreDelta)
         {
             Image<Rgba32> im = Util.UniformRgba(Sw, Sh, Background);
             Image<Rgba32> result = Util.UniformRgba(Sw, Sh, Background);
@@ -83,31 +120,41 @@ namespace primitive.Core
             return result;
         }
 
-        public string SVG()
+        public List<string> GetSVG(bool saveFrames, int Nth = 1)
         {
-            Rgba32 bg = Background;
-            var fillA = Colors[0].A;
-            var vw = Sw / (int)Scale;
-            var vh = Sh / (int)Scale;
-            List<string> lines = new List<string>();
-            lines.Add(String.Format($"<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 {vw} {vh}\">"));
-            lines.Add(String.Format($"<rect width=\"100%\" height=\"100%\" fill=\"#{bg.R:X2}{bg.G:X2}{bg.B:X2}\" />"));
-            lines.Add(String.Format($"<g fill-opacity=\"{(double)fillA / 255}\">"));
-            for (int i = 0; i < Shapes.Count; i++)
+            List<string> result = new List<string>();
+            int frame = 0;
+            if (!saveFrames)
+                frame = Shapes.Count - 1;
+            for (; frame < Shapes.Count; frame += Nth)
             {
-                List<string> attrs = new List<string>();
-                Rgba32 c = Colors[i];
-                attrs.Add(String.Format($"fill=\"#{c.R:X2}{c.G:X2}{c.B:X2}\""));
-                if (c.A != fillA)
+                Rgba32 bg = Background;
+                var fillA = Colors[0].A;
+                var vw = Sw / (int)Scale;
+                var vh = Sh / (int)Scale;
+                List<string> lines = new List<string>();
+                lines.Add(String.Format(
+                    $"<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 {vw} {vh}\">"));
+                lines.Add(String.Format(
+                    $"<rect width=\"100%\" height=\"100%\" fill=\"#{bg.R:X2}{bg.G:X2}{bg.B:X2}\" />"));
+                lines.Add(String.Format($"<g fill-opacity=\"{(double)fillA / 255}\">"));
+                for (int i = 0; i < frame; i++)
                 {
-                    attrs.Add(String.Format($"fill-opacity=\"{(double)c.A / 255}\""));
+                    List<string> attrs = new List<string>();
+                    Rgba32 c = Colors[i];
+                    attrs.Add(String.Format($"fill=\"#{c.R:X2}{c.G:X2}{c.B:X2}\""));
+                    if (c.A != fillA)
+                    {
+                        attrs.Add(String.Format($"fill-opacity=\"{(double)c.A / 255}\""));
+                    }
+                    lines.Add(Shapes[i].SVG(String.Join(" ", attrs)));
                 }
-                lines.Add(Shapes[i].SVG(String.Join(" ", attrs)));
+                lines.Add("</g>");
+                lines.Add("</svg>");
+                lines.Add("\n");
+                result.Add(String.Join("\n", lines));
             }
-            lines.Add("</g>");
-            lines.Add("</svg>");
-            lines.Add("\n");
-            return String.Join("\n", lines);
+            return result;
         }
 
         public void Add(IShape shape, int alpha)
@@ -142,11 +189,6 @@ namespace primitive.Core
                     break;
                 Add(state.Shape, state.Alpha);
             }
-
-            //foreach (var w in Workers)
-            //    Workers[0].Heatmap.AddHeatmap(w.Heatmap);
-            //Util.SavePNG("heatmap.png", Workers[0].Heatmap.Image(0.5));
-
             var counter = 0;
             foreach (var worker in Workers)
                 counter += worker.Counter;

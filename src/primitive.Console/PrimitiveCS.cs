@@ -28,7 +28,7 @@ namespace primitive.Console
         [Required]
         [Option(Description = "Required. Number of shapes.",
             Template = "-n|--number")]
-        public string Nprimitives { get; }
+        public int? Nprimitives { get; }
 
         [Option(Description =
             "Mode: 0=combo, 1=triangle, 2=rect, 3=ellipse, 4=circle, 5=rotatedrect, 6=beziers, 7=rotatedellipse, 8=polygon",
@@ -81,14 +81,7 @@ namespace primitive.Console
             Parameters.Mode = Mode ?? 1;
             Parameters.Alpha = Alpha ?? 128;
             Parameters.Repeat = Repeat ?? 0;
-            foreach (var nprim in Nprimitives.Split(' '))
-                Parameters.ShapeConfigs.Add(new ShapeConfig
-                {
-                    Count = int.Parse(nprim),
-                    Mode = Parameters.Mode,
-                    Alpha = Parameters.Alpha,
-                    Repeat = Parameters.Repeat
-                });
+            Parameters.Nprimitives = Nprimitives ?? 10;
             Parameters.Nth = NthFrame ?? 1;
             Parameters.InputResize = InputResize ?? 256;
             Parameters.OutputSize = OutputSize ?? 1024;
@@ -119,60 +112,38 @@ namespace primitive.Console
                 bgColor = Util.AverageImageColor(inputImage);
             else
                 bgColor = Rgba32.FromHex(Parameters.Background);
-            
+
             // run algorithm
             Model model = new Model(inputImage, bgColor, Parameters.OutputSize, Parameters.Workers);
-            Logger.WriteLine(1, "{0}: t={1:G3}, score={2:G6}", 0, 0.0, model.Score);
-            var start = DateTime.Now;
-            int frame = 0, j = 0;
+            model.RunModel();
 
-            foreach (var shapeConfig in Parameters.ShapeConfigs)
+            // write output image(s)
+            foreach (var outFile in Parameters.OutputFiles)
             {
-                Logger.WriteLine(1, "count={0}, mode={1}, alpha={2}, repeat={3}", shapeConfig.Count, shapeConfig.Mode, shapeConfig.Alpha, shapeConfig.Repeat);
-                for (int i = 0; i < shapeConfig.Count; i++)
+                var ext = Path.GetExtension(outFile).ToLower();
+                bool percent = outFile.Contains("{0");
+                bool saveFrames = percent && !ext.Equals(".gif");
+                
+                Logger.WriteLine(1, "writing {0}", outFile);
+                switch (ext)
                 {
-                    frame++;
-
-                    // find optimal shape and add it to the model
-                    var t = DateTime.Now;
-                    var n = model.Step((ShapeType)shapeConfig.Mode, shapeConfig.Alpha, shapeConfig.Repeat);
-                    var nps = Util.NumberString((double)n / (DateTime.Now - t).TotalSeconds);
-                    var elapsed = (DateTime.Now - start).TotalSeconds;
-                    Logger.WriteLine(1, "{0:00}: t={1:G3}, score={2:G6}, n={3}, n/s={4}", frame, elapsed, model.Score, n, nps);
-
-                    // write output image(s)
-                    foreach (var outFile in Parameters.OutputFiles)
-                    {
-                        var ext = Path.GetExtension(outFile).ToLower();
-                        bool percent = outFile.Contains("{0");
-                        bool saveFrames = percent && !ext.Equals(".gif");
-                        saveFrames = saveFrames && frame % Parameters.Nth == 0;
-                        var last = j == Parameters.ShapeConfigs.Count - 1 && i == shapeConfig.Count - 1;
-                        if (saveFrames || last)
-                        {
-                            var path = outFile;
-                            if (percent)
-                                path = String.Format(outFile, frame);
-                            Logger.WriteLine(1, "writing {0}", path);
-                            switch (ext)
-                            {
-                                case ".png":
-                                    Util.SavePNG(path, model.Result); break;
-                                case ".jpg": case ".jpeg":
-                                    Util.SaveJPG(path, model.Result, 95); break;
-                                case ".svg":
-                                    Util.SaveFile(path, model.SVG()); break;
-                                case ".gif":
-                                    var frames = model.Frames(0.001);
-                                    Util.SaveGIF(path, frames, 50, 250); break;
-                                default:
-                                    throw new Exception("unrecognized file extension: " + ext);
-                            }
-                        }
-                    }
+                    case ".png":
+                    case ".jpg":
+                    case ".jpeg":
+                        Util.SaveFrames(outFile, model.GetFrames(saveFrames, Parameters.Nth));
+                        break;
+                    case ".svg":
+                        Util.SaveSVG(outFile, model.GetSVG(saveFrames, Parameters.Nth));
+                        break;
+                    case ".gif":
+                        Util.SaveGIF(outFile, model.GetFrames(0.001), 50, 250);
+                        break;
+                    default:
+                        throw new Exception("unrecognized file extension: " + ext);
                 }
-                j++;
+
             }
+
             System.Console.WriteLine("End");
         }
     }

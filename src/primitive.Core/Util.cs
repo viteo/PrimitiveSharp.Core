@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -16,20 +17,38 @@ namespace primitive.Core
             return image;
         }
 
-        public static void SaveFile(string path, string contents)
+        public static void SaveSVG(string path, List<string> contents)
         {
-            File.WriteAllText(path, contents);
+            for (int i = 0; i < contents.Count; i++)
+            {
+                string framePath = String.Format(path, i + 1);
+                File.WriteAllText(framePath, contents[i]);
+            }
         }
 
-        public static void SavePNG(string path, Image<Rgba32> image)
+        public static void SaveImage(string path, Image<Rgba32> image)
         {
             image.Save(path);
         }
 
-        public static void SaveJPG(string path, Image<Rgba32> image, int quality)
+        public static void SaveFrames(string path, List<Image<Rgba32>> images)
         {
-            image.Save(path);
+            for (int i = 0; i < images.Count; i++)
+            {
+                string framePath = String.Format(path, i + 1);
+                images[i].Save(framePath);
+            }
         }
+
+        //public static void SavePNG(string path, Image<Rgba32> image)
+        //{
+        //    image.Save(path);
+        //}
+
+        //public static void SaveJPG(string path, Image<Rgba32> image, int quality)
+        //{
+        //    image.Save(path);
+        //}
 
         public static void SaveGIF(string path, Image<Rgba32> frames, int delay, int lastDelay)
         {
