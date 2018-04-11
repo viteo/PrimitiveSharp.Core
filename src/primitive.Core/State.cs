@@ -1,5 +1,13 @@
 ﻿namespace primitive.Core
 {
+    public interface IAnnealable
+    {
+        double Energy();
+        object DoMove();
+        void UndoMove(object state);
+        IAnnealable Copy();
+    }
+
     public class State : IAnnealable
     {
         public Worker Worker { get; set; }

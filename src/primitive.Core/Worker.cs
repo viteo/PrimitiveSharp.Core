@@ -14,7 +14,6 @@ namespace primitive.Core
         public Image<Rgba32> Current { get; set; }
         public Image<Rgba32> Buffer { get; set; }
         public List<Scanline> Lines { get; set; }
-        public Heatmap Heatmap { get; set; }
         public Random Rnd { get; set; }
         public double Score { get; set; }
         public int Counter { get; set; }
@@ -28,7 +27,6 @@ namespace primitive.Core
             Target = target;
             Buffer = new Image<Rgba32>(target.Width, target.Height);
             Lines = new List<Scanline>();
-            Heatmap = new Heatmap(w, h);
             Rnd = new Random((int)DateTime.Now.Ticks);
         }
 
@@ -37,14 +35,12 @@ namespace primitive.Core
             Current = current;
             Score = score;
             Counter = 0;
-            Heatmap.Clear();
         }
 
         public double Energy(IShape shape, int alpha)
         {
             Counter++;
             var lines = shape.Rasterize();
-            //Heatmap.Add(lines);
             Rgba32 color = Core.ComputeColor(Target, Current, lines, alpha);
             Core.CopyLines(Buffer, Current, lines);
             Core.DrawLines(Buffer, color, lines);
