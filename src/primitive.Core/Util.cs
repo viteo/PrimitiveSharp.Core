@@ -31,24 +31,14 @@ namespace primitive.Core
             image.Save(path);
         }
 
-        public static void SaveFrames(string path, List<Image<Rgba32>> images)
+        public static void SaveFrames(string path, Image<Rgba32> images)
         {
-            for (int i = 0; i < images.Count; i++)
+            for (int i = images.Frames.Count - 1 ; i >= 0; i--)
             {
-                string framePath = String.Format(path, i + 1);
-                images[i].Save(framePath);
+                string framePath = String.Format(path, i);
+                images.Frames.CloneFrame(i).Save(framePath);
             }
         }
-
-        //public static void SavePNG(string path, Image<Rgba32> image)
-        //{
-        //    image.Save(path);
-        //}
-
-        //public static void SaveJPG(string path, Image<Rgba32> image, int quality)
-        //{
-        //    image.Save(path);
-        //}
 
         public static void SaveGIF(string path, Image<Rgba32> frames, int delay, int lastDelay)
         {

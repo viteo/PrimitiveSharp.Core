@@ -82,19 +82,18 @@ namespace primitive.Core
             }
         }
 
-        public List<Image<Rgba32>> GetFrames(bool saveFrames, int Nth = 1)
+        public Image<Rgba32> GetFrames(bool saveFrames, int Nth = 1)
         {
             if (!saveFrames)
-                return new List<Image<Rgba32>> { Result };
+                return Result;
             Image<Rgba32> im = Util.UniformRgba(Sw, Sh, Background);
-            var result = new List<Image<Rgba32>>();
+            Image<Rgba32> result = Util.UniformRgba(Sw, Sh, Background);
             for (int i = 0; i < Shapes.Count; i++)
             {
-                if (i % Nth != 0)
-                    continue;
                 Rgba32 c = Colors[i];
                 Shapes[i].Draw(im, c, Scale);
-                result.Add(im.Clone());
+                if (i % Nth == 0)
+                    result.Frames.AddFrame(im.Frames[0]);
             }
             return result;
         }
@@ -123,10 +122,10 @@ namespace primitive.Core
         public List<string> GetSVG(bool saveFrames, int Nth = 1)
         {
             List<string> result = new List<string>();
-            int frame = 0;
+            int frameNum = 0;
             if (!saveFrames)
-                frame = Shapes.Count - 1;
-            for (; frame < Shapes.Count; frame += Nth)
+                frameNum = Shapes.Count - 1;
+            for (; frameNum < Shapes.Count; frameNum += Nth)
             {
                 Rgba32 bg = Background;
                 var fillA = Colors[0].A;
@@ -138,7 +137,7 @@ namespace primitive.Core
                 lines.Add(String.Format(
                     $"<rect width=\"100%\" height=\"100%\" fill=\"#{bg.R:X2}{bg.G:X2}{bg.B:X2}\" />"));
                 lines.Add(String.Format($"<g fill-opacity=\"{(double)fillA / 255}\">"));
-                for (int i = 0; i < frame; i++)
+                for (int i = 0; i < frameNum; i++)
                 {
                     List<string> attrs = new List<string>();
                     Rgba32 c = Colors[i];

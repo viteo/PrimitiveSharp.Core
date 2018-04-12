@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using McMaster.Extensions.CommandLineUtils;
@@ -136,7 +135,7 @@ namespace primitive.Console
                         Util.SaveSVG(outFile, model.GetSVG(saveFrames, Parameters.Nth));
                         break;
                     case ".gif":
-                        Util.SaveGIF(outFile, model.GetFrames(0.001), 50, 250);
+                        Util.SaveGIF(outFile, model.GetFrames(0.001), 0, 0);
                         break;
                     default:
                         throw new Exception("unrecognized file extension: " + ext);
