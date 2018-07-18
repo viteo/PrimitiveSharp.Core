@@ -63,15 +63,20 @@ namespace primitive.Core
             foreach (var line in lines)
             {
                 var ma = line.Alpha;
+                var sra = sr * ma;
+                var sga = sg * ma;
+                var sba = sb * ma;
+                var saa = sa * ma;
                 var a = (m - sa * ma / m) * 0x101;
+
                 for (int x = line.X1; x <= line.X2; x++)
                 {
                     var dc = im[x, line.Y];
                     c = new Rgba32(
-                        (byte)((dc.R * a + sr * ma) / m >> 8),
-                        (byte)((dc.G * a + sg * ma) / m >> 8),
-                        (byte)((dc.B * a + sb * ma) / m >> 8),
-                        (byte)((dc.A * a + sa * ma) / m >> 8));
+                        (byte)((dc.R * a + sra) / m >> 8),
+                        (byte)((dc.G * a + sga) / m >> 8),
+                        (byte)((dc.B * a + sba) / m >> 8),
+                        (byte)((dc.A * a + saa) / m >> 8));
                     im[x, line.Y] = c;
                 }
             }
