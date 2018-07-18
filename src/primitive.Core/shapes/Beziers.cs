@@ -61,7 +61,7 @@ namespace primitive.Core
             var rnd = Worker.Rnd;
             for (; ; )
             {
-                switch (rnd.Next(3))
+                switch (rnd.Next(4))
                 {
                     case 0:
                         P1 = new PointF
