@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "primitive.Core", "src\primi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "primitive.Console", "src\primitive.Console\primitive.Console.csproj", "{F3737F6A-0F13-48B1-A176-54D73E685D18}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "primitive.Tui", "src\primitive.Tui\primitive.Tui.csproj", "{F1116356-5741-4A05-8A7C-BF1703A5C2B0}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +21,6 @@ Global
 		{F3737F6A-0F13-48B1-A176-54D73E685D18}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F3737F6A-0F13-48B1-A176-54D73E685D18}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F3737F6A-0F13-48B1-A176-54D73E685D18}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F1116356-5741-4A05-8A7C-BF1703A5C2B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F1116356-5741-4A05-8A7C-BF1703A5C2B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F1116356-5741-4A05-8A7C-BF1703A5C2B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F1116356-5741-4A05-8A7C-BF1703A5C2B0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
