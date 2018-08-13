@@ -4,6 +4,7 @@ using System.IO;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Advanced;
 
 namespace primitive.Core
 {
@@ -31,7 +32,7 @@ namespace primitive.Core
 
         public static void SaveFrames(string path, Image<Rgba32> images)
         {
-            for (int i = images.Frames.Count - 1 ; i >= 0; i--)
+            for (int i = images.Frames.Count - 1; i >= 0; i--)
             {
                 string framePath = String.Format(path, i);
                 images.Frames.CloneFrame(i).Save(framePath);
@@ -95,14 +96,13 @@ namespace primitive.Core
             int w = image.Width;
             int h = image.Height;
             int r = 0, g = 0, b = 0;
-
-            for (int y = 0; y < h; y++)
-                for (int x = 0; x < w; x++)
-                {
-                    b += image[x, y].B;
-                    g += image[x, y].G;
-                    r += image[x, y].R;
-                }
+            ReadOnlySpan<Rgba32> imageSpan = image.GetPixelSpan();
+            for (int i = 0; i < h * w; i++)
+            {
+                b += imageSpan[i].B;
+                g += imageSpan[i].G;
+                r += imageSpan[i].R;
+            }
             r /= w * h;
             g /= w * h;
             b /= w * h;

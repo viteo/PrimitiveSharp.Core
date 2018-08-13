@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Advanced;
 
 namespace primitive.Core
 {
@@ -12,16 +13,22 @@ namespace primitive.Core
             long rsum = 0, gsum = 0, bsum = 0, count = 0;
             var a = 0x101 * 255 / alpha;
 
+            var targetSpan = target.GetPixelSpan();
+            var currentSpan = current.GetPixelSpan();
+
             foreach (var line in lines)
+            {
+                int i = line.X1 + line.Y * target.Width;
                 for (int x = line.X1; x <= line.X2; x++)
                 {
-                    var tc = target[x, line.Y];
-                    var cc = current[x, line.Y];
+                    var tc = targetSpan[i];
+                    var cc = currentSpan[i];
                     rsum += (tc.R - cc.R) * a + cc.R * 0x101;
                     gsum += (tc.G - cc.G) * a + cc.G * 0x101;
                     bsum += (tc.B - cc.B) * a + cc.B * 0x101;
-                    count++;
+                    count++; i++;
                 }
+            }
 
             if (count == 0) return Rgba32.Black;
 
@@ -34,10 +41,13 @@ namespace primitive.Core
 
         public static void CopyLines(Image<Rgba32> dst, Image<Rgba32> src, List<Scanline> lines)
         {
+            Span<Rgba32> dstSpan = dst.GetPixelSpan();
+            ReadOnlySpan<Rgba32> srcSpan = src.GetPixelSpan();
             foreach (var line in lines)
             {
-                for (int x = line.X1; x < line.X2; x++)
-                    dst[x, line.Y] = src[x, line.Y];
+                int i = line.X1 + line.Y * dst.Width;
+                for (int x = line.X1; x < line.X2; x++,i++)
+                    dstSpan[i] = srcSpan[i];
             }
         }
 
@@ -60,6 +70,8 @@ namespace primitive.Core
             uint sa = (uint)(c.A);
             sa |= sa << 8;
 
+            Span<Rgba32> imSpan = im.GetPixelSpan();
+
             foreach (var line in lines)
             {
                 var ma = line.Alpha;
@@ -68,16 +80,17 @@ namespace primitive.Core
                 var sba = sb * ma;
                 var saa = sa * ma;
                 var a = (m - sa * ma / m) * 0x101;
-
+                int i = line.X1 + line.Y * im.Width;
                 for (int x = line.X1; x <= line.X2; x++)
                 {
-                    var dc = im[x, line.Y];
+                    var dc = imSpan[i];
                     c = new Rgba32(
                         (byte)((dc.R * a + sra) / m >> 8),
                         (byte)((dc.G * a + sga) / m >> 8),
                         (byte)((dc.B * a + sba) / m >> 8),
                         (byte)((dc.A * a + saa) / m >> 8));
-                    im[x, line.Y] = c;
+                    imSpan[i] = c;
+                    i++;
                 }
             }
         }
@@ -87,19 +100,18 @@ namespace primitive.Core
             int w = a.Width;
             int h = a.Height;
             ulong total = 0;
+            ReadOnlySpan<Rgba32> aSpan = a.GetPixelSpan();
+            ReadOnlySpan<Rgba32> bSpan = b.GetPixelSpan();
 
-            for (int y = 0; y < h; y++)
+            for(int i = 0; i < h * w; i++)
             {
-                for (int x = 0; x < w; x++)
-                {
-                    var ac = a[x, y];
-                    var bc = b[x, y];
-                    var dr = ac.R - bc.R;
-                    var dg = ac.G - bc.G;
-                    var db = ac.B - bc.B;
-                    var da = ac.A - bc.A;
-                    total += (ulong)(dr * dr + dg * dg + db * db + da * da);
-                }
+                var ac = aSpan[i];
+                var bc = bSpan[i];
+                var dr = ac.R - bc.R;
+                var dg = ac.G - bc.G;
+                var db = ac.B - bc.B;
+                var da = ac.A - bc.A;
+                total += (ulong)(dr * dr + dg * dg + db * db + da * da);
             }
             return Math.Sqrt((double)total / (double)(w * h * 4)) / 255; ;
         }
@@ -109,14 +121,18 @@ namespace primitive.Core
             int w = target.Width;
             int h = target.Height;
             var total = (ulong)(Math.Pow(score * 255, 2) * (double)(w * h * 4));
-
+            ReadOnlySpan<Rgba32> targetSpan = target.GetPixelSpan();
+            ReadOnlySpan<Rgba32> beforeSpan = before.GetPixelSpan();
+            ReadOnlySpan<Rgba32> afterSpan = after.GetPixelSpan();
             foreach (var line in lines)
             {
+                int i = line.X1 + line.Y * target.Width;
                 for (int x = line.X1; x <= line.X2; x++)
                 {
-                    var tc = target[x, line.Y];
-                    var bc = before[x, line.Y];
-                    var ac = after[x, line.Y];
+                    var tc = targetSpan[i];
+                    var bc = beforeSpan[i];
+                    var ac = afterSpan[i];
+                    i++;
                     var dr1 = tc.R - bc.R;
                     var dg1 = tc.G - bc.G;
                     var db1 = tc.B - bc.B;
