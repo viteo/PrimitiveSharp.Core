@@ -26,7 +26,8 @@ namespace primitive.Core
         Octagon,
         FourPointedStar,
         Pentagram,
-        Hexagram
+        Hexagram,
+        Crescent
     }
 
     public interface IShape

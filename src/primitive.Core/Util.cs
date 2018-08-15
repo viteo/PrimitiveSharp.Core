@@ -110,26 +110,6 @@ namespace primitive.Core
             return result;
         }
 
-        public static Image<Rgba32> Resize(Image<Rgba32> image)
-        {
-            int width, height;
-            int size = Parameters.InputResize;
-            if (size >= image.Width && size >= image.Height)
-                return image;
-            if (image.Width > image.Height)
-            {
-                width = size;
-                height = Convert.ToInt32(image.Height * size / (double)image.Width);
-            }
-            else
-            {
-                width = Convert.ToInt32(image.Width * size / (double)image.Height);
-                height = size;
-            }
-            image.Mutate(im => im.Resize(width, height));
-            return image;
-        }
-
         /// <summary>
         ///   Generates normally distributed numbers. Each operation makes two Gaussians for the price of one, and apparently they can be cached or something for better performance, but who cares.
         /// </summary>

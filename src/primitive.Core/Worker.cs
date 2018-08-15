@@ -57,7 +57,6 @@ namespace primitive.Core
                 var before = state.Energy();
                 state = Optimize.HillClimb(state, age);
                 var energy = state.Energy();
-                Logger.WriteLine(2, "{0}x random: {1:G6} -> {2}x hill climb: {3:G6} ", n, before, age, energy);
                 if (i == 0 || energy < bestEnergy)
                 {
                     bestEnergy = energy;
@@ -120,6 +119,8 @@ namespace primitive.Core
                     return new State(this, new StarRegular(this, 5), a);
                 case ShapeType.Hexagram:
                     return new State(this, new StarRegular(this, 6), a);
+                case ShapeType.Crescent:
+                    return new State(this, new Crescent(this), a);
             }
         }
 

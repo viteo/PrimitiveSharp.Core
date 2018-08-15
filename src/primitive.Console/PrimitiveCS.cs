@@ -17,7 +17,7 @@ namespace primitive.Console
         [Required]
         [Option(Description = "Required. Input file.",
             Template = "-i|--input")]
-        public string Input { get; }
+        public string InputFile { get; }
 
         [Required]
         [Option(Description = "Required. Output file.",
@@ -73,51 +73,43 @@ namespace primitive.Console
 
         private void OnExecute()
         {
+            ParametersModel parameters = new ParametersModel();
             // parse and validate arguments
-            Parameters.InputFile = Input;
-            foreach (var output in OutputFiles.Split(' '))
-                Parameters.OutputFiles.Add(output);
-            Parameters.Mode = Mode ?? 1;
-            Parameters.Alpha = Alpha ?? 128;
-            Parameters.Repeat = Repeat ?? 0;
-            Parameters.Nprimitives = Nprimitives ?? 10;
-            Parameters.Nth = NthFrame ?? 1;
-            Parameters.InputResize = InputResize ?? 256;
-            Parameters.OutputSize = OutputSize ?? 1024;
-            Parameters.Background = Background ?? "";
-            Parameters.Workers = Workers ?? 0;
+            parameters.Mode = (ShapeType)Mode;
+            parameters.Alpha = (byte)(Alpha ?? 128);
+            parameters.Repeat = Repeat ?? 0;
+            parameters.Nprimitives = Nprimitives ?? 10;
+            parameters.NthFrame = NthFrame ?? 1;
+            parameters.CanvasResize = InputResize ?? 256;
+            parameters.RenderSize = OutputSize ?? 1024;
+            parameters.WorkersCount = Workers ?? 0;
 
             // set log level
             if (Verbose)
-                Parameters.LogLevel = 1;
+                parameters.LogLevel = 1;
             if (VeryVerbose)
-                Parameters.LogLevel = 2;
+                parameters.LogLevel = 2;
 
             // determine worker count
-            if (Parameters.Workers < 1)
-                Parameters.Workers = Environment.ProcessorCount;
+            if (parameters.WorkersCount < 1)
+                parameters.WorkersCount = Environment.ProcessorCount;
 
             // read input image
-            Logger.WriteLine(1, "reading {0}", Parameters.InputFile);
-            Image<Rgba32> inputImage = Util.LoadImage(Parameters.InputFile);
-
-            // scale down input image if needed
-            if (Parameters.InputResize > 0)
-                inputImage = Util.Resize(inputImage);
+            Logger.WriteLine(1, "reading {0}", InputFile);
+            Image<Rgba32> inputImage = Util.LoadImage(InputFile);
 
             // determine background color
-            Rgba32 bgColor;
-            if (Parameters.Background == "")
-                bgColor = Util.AverageImageColor(inputImage);
+            if (String.IsNullOrEmpty(Background))
+                parameters.Background = Util.AverageImageColor(inputImage);
             else
-                bgColor = Rgba32.FromHex(Parameters.Background);
+                parameters.Background = Rgba32.FromHex(Background);
 
             // run algorithm
-            Model model = new Model(inputImage, bgColor, Parameters.OutputSize, Parameters.Workers);
-            model.RunModel();
+            RendererModel model = new RendererModel(inputImage, parameters);
+            model.RunRenderer();
 
             // write output image(s)
-            foreach (var outFile in Parameters.OutputFiles)
+            foreach (var outFile in OutputFiles.Split(' '))
             {
                 var ext = Path.GetExtension(outFile).ToLower();
                 bool percent = outFile.Contains("{0");
@@ -129,10 +121,10 @@ namespace primitive.Console
                     case ".png":
                     case ".jpg":
                     case ".jpeg":
-                        Util.SaveFrames(outFile, model.GetFrames(saveFrames, Parameters.Nth));
+                        Util.SaveFrames(outFile, model.GetFrames(saveFrames, parameters.NthFrame));
                         break;
                     case ".svg":
-                        Util.SaveSVG(outFile, model.GetSVG(saveFrames, Parameters.Nth));
+                        Util.SaveSVG(outFile, model.GetSVG(saveFrames, parameters.NthFrame));
                         break;
                     case ".gif":
                         Util.SaveGIF(outFile, model.GetFrames(0.001), 0, 0);
