@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using SixLabors.Primitives;
+﻿using SixLabors.Primitives;
 using SixLabors.Shapes;
+using System;
+using System.Collections.Generic;
 
 namespace primitive.Core
 {
-
     public class StarRegular : PolygonRegular
     {
         private double Ratio
@@ -23,11 +21,11 @@ namespace primitive.Core
             }
         }
 
-        public StarRegular(Worker worker, int vertices) : base(worker, vertices)
+        public StarRegular(WorkerModel worker, int vertices) : base(worker, vertices)
         {
         }
 
-        public StarRegular(Worker worker, PointF center, double angle, double radius, int vertices):
+        public StarRegular(WorkerModel worker, PointF center, double angle, double radius, int vertices):
             base(worker,center,angle,radius,vertices)
         {
         }

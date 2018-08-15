@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Numerics;
-using SixLabors.ImageSharp;
+﻿using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using SixLabors.Shapes;
 using SixLabors.Primitives;
+using SixLabors.Shapes;
+using System;
+using System.Collections.Generic;
+using System.Numerics;
 
 namespace primitive.Core
 {
@@ -32,19 +32,19 @@ namespace primitive.Core
 
     public interface IShape
     {
-        Worker Worker { get; set; }
+        WorkerModel Worker { get; set; }
         IShape Copy();
         IPath GetPath();
         void Draw(Image<Rgba32> image, Rgba32 color, double scale);
         void Mutate();
         string SVG(string attrs);
-        List<Scanline> Rasterize();
+        List<ScanlineModel> Rasterize();
     }
 
     public abstract class Shape : IShape
     {
         private static readonly Comparer<PointF> comparer = Comparer<PointF>.Create((a, b) => a.X.CompareTo(b.X));
-        public Worker Worker { get; set; }
+        public WorkerModel Worker { get; set; }
         public abstract IShape Copy();
         public abstract IPath GetPath();
         public abstract void Mutate();
@@ -56,9 +56,9 @@ namespace primitive.Core
                 .Fill(color, GetPath().Transform(Matrix3x2.CreateScale((float)scale))));
         }
 
-        public virtual List<Scanline> Rasterize()
+        public virtual List<ScanlineModel> Rasterize()
         {
-            List<Scanline> lines = new List<Scanline>();
+            List<ScanlineModel> lines = new List<ScanlineModel>();
 
             var w = Worker.W;
             var h = Worker.H;
@@ -66,8 +66,8 @@ namespace primitive.Core
             PointF[] interscertions = new PointF[path.MaxIntersections];
 
             var bounds = path.Bounds;
-            var bot = Util.Clamp((int)bounds.Bottom, 0, h - 1);
-            var top = Util.Clamp((int)bounds.Top, 0, h - 1);
+            var bot = (int)bounds.Bottom.Clamp(0, h - 1);
+            var top = (int)bounds.Top.Clamp(0, h - 1);
 
             for (int y = bot; y >= top; y--)
             {
@@ -77,19 +77,19 @@ namespace primitive.Core
                 {
                     for (int i = 0; i < n; i += 2)
                     {
-                        lines.Add(new Scanline
+                        lines.Add(new ScanlineModel
                         {
                             Alpha = 0xffff,
-                            X1 = Util.Clamp((int)interscertions[i].X, 0, w - 1),
-                            X2 = Util.Clamp((int)interscertions[i + 1].X, 0, w - 1),
+                            X1 = (int)interscertions[i].X.Clamp(0, w - 1),
+                            X2 = (int)interscertions[i + 1].X.Clamp(0, w - 1),
                             Y = y
                         });
                     }
                 }
                 else if (n == 1)
                 {
-                    var x = Util.Clamp((int)interscertions[0].X, 0, w - 1);
-                    lines.Add(new Scanline
+                    var x = (int)interscertions[0].X.Clamp(0, w - 1);
+                    lines.Add(new ScanlineModel
                     {
                         Alpha = 0xffff,
                         X1 = x,

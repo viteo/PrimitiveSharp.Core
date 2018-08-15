@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using SixLabors.Shapes;
+﻿using SixLabors.Shapes;
+using System.Collections.Generic;
 
 namespace primitive.Core
 {
@@ -10,17 +10,17 @@ namespace primitive.Core
         public int Y1 { get; set; }
         public int Y2 { get; set; }
 
-        public RectangleStraight(Worker worker)
+        public RectangleStraight(WorkerModel worker)
         {
             var rnd = worker.Rnd;
             X1 = rnd.Next(worker.W);
             Y1 = rnd.Next(worker.H);
-            X2 = Util.Clamp(X1 + rnd.Next(32) + 1, 0, worker.W - 1);
-            Y2 = Util.Clamp(Y1 + rnd.Next(32) + 1, 0, worker.H - 1);
+            X2 = (X1 + rnd.Next(32) + 1).Clamp(0, worker.W - 1);
+            Y2 = (Y1 + rnd.Next(32) + 1).Clamp(0, worker.H - 1);
             Worker = worker;
         }
 
-        public RectangleStraight(Worker worker, int x1, int y1, int x2, int y2)
+        public RectangleStraight(WorkerModel worker, int x1, int y1, int x2, int y2)
         {
             Worker = worker;
             X1 = x1; Y1 = y1;
@@ -69,20 +69,20 @@ namespace primitive.Core
             switch (rnd.Next(2))
             {
                 case 0:
-                    X1 = Util.Clamp(X1 + (int)(rnd.NextGaussian() * 16), 0, w - 1);
-                    Y1 = Util.Clamp(Y1 + (int)(rnd.NextGaussian() * 16), 0, h - 1); break;
+                    X1 = (X1 + (int)(rnd.NextGaussian() * 16)).Clamp(0, w - 1);
+                    Y1 = (Y1 + (int)(rnd.NextGaussian() * 16)).Clamp(0, h - 1); break;
                 case 1:
-                    X2 = Util.Clamp(X2 + (int)(rnd.NextGaussian() * 16), 0, w - 1);
-                    Y2 = Util.Clamp(Y2 + (int)(rnd.NextGaussian() * 16), 0, h - 1); break;
+                    X2 = (X2 + (int)(rnd.NextGaussian() * 16)).Clamp(0, w - 1);
+                    Y2 = (Y2 + (int)(rnd.NextGaussian() * 16)).Clamp(0, h - 1); break;
             }
         }
 
-        public override List<Scanline> Rasterize()
+        public override List<ScanlineModel> Rasterize()
         {
             CheckBounds();
-            var lines = new List<Scanline>();
+            var lines = new List<ScanlineModel>();
             for (int y = Y1; y <= Y2; y++)
-                lines.Add(new Scanline() { Y = y, X1 = this.X1, X2 = this.X2, Alpha = 0xffff });
+                lines.Add(new ScanlineModel() { Y = y, X1 = this.X1, X2 = this.X2, Alpha = 0xffff });
             return lines;
         }
     }
@@ -95,7 +95,7 @@ namespace primitive.Core
         public int Sy { get; set; }
         public int Angle { get; set; }
 
-        public RectangleRotated(Worker worker)
+        public RectangleRotated(WorkerModel worker)
         {
             var rnd = worker.Rnd;
             X = rnd.Next(worker.W);
@@ -107,7 +107,7 @@ namespace primitive.Core
             Mutate();
         }
 
-        public RectangleRotated(Worker worker, int x, int y, int sx, int sy, int angle)
+        public RectangleRotated(WorkerModel worker, int x, int y, int sx, int sy, int angle)
         {
             Worker = worker;
             X = x; Y = y;
@@ -148,11 +148,11 @@ namespace primitive.Core
             switch (rnd.Next(3))
             {
                 case 0:
-                    X = Util.Clamp(X + (int)(rnd.NextGaussian() * 16), 0, w - 1);
-                    Y = Util.Clamp(Y + (int)(rnd.NextGaussian() * 16), 0, h - 1); break;
+                    X = (X + (int)(rnd.NextGaussian() * 16)).Clamp(0, w - 1);
+                    Y = (Y + (int)(rnd.NextGaussian() * 16)).Clamp(0, h - 1); break;
                 case 1:
-                    Sx = Util.Clamp(Sx + (int)(rnd.NextGaussian() * 16), 0, w - 1);
-                    Sy = Util.Clamp(Sy + (int)(rnd.NextGaussian() * 16), 0, h - 1); break;
+                    Sx = (Sx + (int)(rnd.NextGaussian() * 16)).Clamp(0, w - 1);
+                    Sy = (Sy + (int)(rnd.NextGaussian() * 16)).Clamp(0, h - 1); break;
                 case 3:
                     Angle = Angle + (int)(rnd.NextGaussian() * 32); break;
             }
@@ -167,7 +167,7 @@ namespace primitive.Core
         {
             int a = Sx, b = Sy;
             if (a < b) { a = Sy; b = Sx; }
-            var aspect = (double)a / (double)b;
+            var aspect = a / (double)b;
             return aspect <= 5;
         }
     }

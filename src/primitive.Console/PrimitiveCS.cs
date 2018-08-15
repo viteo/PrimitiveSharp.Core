@@ -1,10 +1,9 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.IO;
-using McMaster.Extensions.CommandLineUtils;
+﻿using McMaster.Extensions.CommandLineUtils;
+using primitive.Core;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using primitive.Core;
+using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace primitive.Console
 {
@@ -76,7 +75,7 @@ namespace primitive.Console
             ParametersModel parameters = new ParametersModel();
             // parse and validate arguments
             parameters.Mode = (ShapeType)Mode;
-            parameters.Alpha = (byte)(Alpha ?? 128);
+            parameters.Alpha = (byte)(Alpha ?? 0x80);
             parameters.Repeat = Repeat ?? 0;
             parameters.Nprimitives = Nprimitives ?? 10;
             parameters.NthFrame = NthFrame ?? 1;
@@ -96,11 +95,11 @@ namespace primitive.Console
 
             // read input image
             Logger.WriteLine(1, "reading {0}", InputFile);
-            Image<Rgba32> inputImage = Util.LoadImage(InputFile);
+            Image<Rgba32> inputImage = File.LoadImage(InputFile);
 
             // determine background color
             if (String.IsNullOrEmpty(Background))
-                parameters.Background = Util.AverageImageColor(inputImage);
+                parameters.Background = Core.Core.AverageImageColor(inputImage);
             else
                 parameters.Background = Rgba32.FromHex(Background);
 
@@ -111,23 +110,23 @@ namespace primitive.Console
             // write output image(s)
             foreach (var outFile in OutputFiles.Split(' '))
             {
-                var ext = Path.GetExtension(outFile).ToLower();
+                var ext = System.IO.Path.GetExtension(outFile).ToLower();
                 bool percent = outFile.Contains("{0");
                 bool saveFrames = percent && !ext.Equals(".gif");
-                
+
                 Logger.WriteLine(1, "writing {0}", outFile);
                 switch (ext)
                 {
                     case ".png":
                     case ".jpg":
                     case ".jpeg":
-                        Util.SaveFrames(outFile, model.GetFrames(saveFrames, parameters.NthFrame));
+                        File.SaveFrames(outFile, model.GetFrames(saveFrames, parameters.NthFrame));
                         break;
                     case ".svg":
-                        Util.SaveSVG(outFile, model.GetSVG(saveFrames, parameters.NthFrame));
+                        File.SaveSVG(outFile, model.GetSVG(saveFrames, parameters.NthFrame));
                         break;
                     case ".gif":
-                        Util.SaveGIF(outFile, model.GetFrames(0.001), 0, 0);
+                        File.SaveGIF(outFile, model.GetFrames(0.001), 0, 0);
                         break;
                     default:
                         throw new Exception("unrecognized file extension: " + ext);

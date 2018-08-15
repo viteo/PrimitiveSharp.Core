@@ -1,14 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
+﻿using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Advanced;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using System;
+using System.Collections.Generic;
 
 namespace primitive.Core
 {
     public static class Core
     {
-        public static Rgba32 ComputeColor(Image<Rgba32> target, Image<Rgba32> current, List<Scanline> lines, int alpha)
+        public static Rgba32 ComputeColor(Image<Rgba32> target, Image<Rgba32> current, List<ScanlineModel> lines, int alpha)
         {
             long rsum = 0, gsum = 0, bsum = 0, count = 0;
             var a = 0x101 * 255 / alpha;
@@ -32,26 +33,26 @@ namespace primitive.Core
 
             if (count == 0) return Rgba32.Black;
 
-            var r = Util.Clamp((int)(rsum / count) >> 8, 0, 255);
-            var g = Util.Clamp((int)(gsum / count) >> 8, 0, 255);
-            var b = Util.Clamp((int)(bsum / count) >> 8, 0, 255);
+            var r = ((int)(rsum / count) >> 8).Clamp(0, 255);
+            var g = ((int)(gsum / count) >> 8).Clamp(0, 255);
+            var b = ((int)(bsum / count) >> 8).Clamp(0, 255);
 
             return new Rgba32((byte)r, (byte)g, (byte)b, (byte)alpha);
         }
 
-        public static void CopyLines(Image<Rgba32> dst, Image<Rgba32> src, List<Scanline> lines)
+        public static void CopyLines(Image<Rgba32> dst, Image<Rgba32> src, List<ScanlineModel> lines)
         {
             Span<Rgba32> dstSpan = dst.GetPixelSpan();
             ReadOnlySpan<Rgba32> srcSpan = src.GetPixelSpan();
             foreach (var line in lines)
             {
                 int i = line.X1 + line.Y * dst.Width;
-                for (int x = line.X1; x < line.X2; x++,i++)
+                for (int x = line.X1; x < line.X2; x++, i++)
                     dstSpan[i] = srcSpan[i];
             }
         }
 
-        public static void DrawLines(Image<Rgba32> im, Rgba32 c, List<Scanline> lines)
+        public static void DrawLines(Image<Rgba32> im, Rgba32 c, List<ScanlineModel> lines)
         {
             const int m = 0xffff;
 
@@ -103,7 +104,7 @@ namespace primitive.Core
             ReadOnlySpan<Rgba32> aSpan = a.GetPixelSpan();
             ReadOnlySpan<Rgba32> bSpan = b.GetPixelSpan();
 
-            for(int i = 0; i < h * w; i++)
+            for (int i = 0; i < h * w; i++)
             {
                 var ac = aSpan[i];
                 var bc = bSpan[i];
@@ -116,7 +117,7 @@ namespace primitive.Core
             return Math.Sqrt((double)total / (double)(w * h * 4)) / 255; ;
         }
 
-        public static double DifferencePartial(Image<Rgba32> target, Image<Rgba32> before, Image<Rgba32> after, double score, List<Scanline> lines)
+        public static double DifferencePartial(Image<Rgba32> target, Image<Rgba32> before, Image<Rgba32> after, double score, List<ScanlineModel> lines)
         {
             int w = target.Width;
             int h = target.Height;
@@ -146,6 +147,32 @@ namespace primitive.Core
                 }
             }
             return Math.Sqrt((double)total / (double)(w * h * 4)) / 255;
+        }
+
+        public static Image<Rgba32> UniformImage(int width, int height, Rgba32 c)
+        {
+            Image<Rgba32> image = new Image<Rgba32>(width, height);
+            image.Mutate(i => i.Fill(c));
+            return image;
+        }
+
+        public static Rgba32 AverageImageColor(Image<Rgba32> image)
+        {
+            int w = image.Width;
+            int h = image.Height;
+            int r = 0, g = 0, b = 0;
+            ReadOnlySpan<Rgba32> imageSpan = image.GetPixelSpan();
+            for (int i = 0; i < h * w; i++)
+            {
+                b += imageSpan[i].B;
+                g += imageSpan[i].G;
+                r += imageSpan[i].R;
+            }
+            r /= w * h;
+            g /= w * h;
+            b /= w * h;
+            Rgba32 result = new Rgba32((byte)r, (byte)g, (byte)b, (byte)255);
+            return result;
         }
     }
 }

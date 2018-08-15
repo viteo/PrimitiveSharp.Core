@@ -25,7 +25,7 @@ namespace primitive.Core
         private List<IShape> Shapes { get; set; }
         private List<Rgba32> Colors { get; set; }
         private List<double> Scores { get; set; }
-        private List<Worker> Workers { get; set; }
+        private List<WorkerModel> Workers { get; set; }
 
         public RendererModel(Image<Rgba32> input, ParametersModel parameters)
         {
@@ -46,22 +46,22 @@ namespace primitive.Core
             Nprimitives = parameters.Nprimitives;
             Mode = parameters.Mode;
             Alpha = parameters.Alpha;
-            Repeat = parameters.Repeat;            
+            Repeat = parameters.Repeat;
             Background = parameters.Background;
             WorkersCount = parameters.WorkersCount;
             Input = input;//.Clone();
-            Current = Util.UniformRgba(input.Width, input.Height, Background);
-            Result = Util.UniformRgba(Width, Height, Background);
+            Current = Core.UniformImage(input.Width, input.Height, Background);
+            Result = Core.UniformImage(Width, Height, Background);
 
             Score = Core.DifferenceFull(Input, Current);
             Shapes = new List<IShape>();
             Colors = new List<Rgba32>();
             Scores = new List<double>();
-            Workers = new List<Worker>();
+            Workers = new List<WorkerModel>();
 
             for (int i = 0; i < WorkersCount; i++)
             {
-                var worker = new Worker(Input);
+                var worker = new WorkerModel(Input);
                 Workers.Add(worker);
             }
         }
@@ -90,8 +90,8 @@ namespace primitive.Core
         {
             if (!saveFrames)
                 return Result;
-            Image<Rgba32> im = Util.UniformRgba(Width, Height, Background);
-            Image<Rgba32> result = Util.UniformRgba(Width, Height, Background);
+            Image<Rgba32> im = Core.UniformImage(Width, Height, Background);
+            Image<Rgba32> result = Core.UniformImage(Width, Height, Background);
             for (int i = 0; i < Shapes.Count; i++)
             {
                 Rgba32 c = Colors[i];
@@ -104,8 +104,8 @@ namespace primitive.Core
 
         public Image<Rgba32> GetFrames(double scoreDelta)
         {
-            Image<Rgba32> im = Util.UniformRgba(Width, Height, Background);
-            Image<Rgba32> result = Util.UniformRgba(Width, Height, Background);
+            Image<Rgba32> im = Core.UniformImage(Width, Height, Background);
+            Image<Rgba32> result = Core.UniformImage(Width, Height, Background);
             result.Frames.AddFrame(im.Frames[0]);
             double previous = 10;
             for (int i = 0; i < Shapes.Count; i++)
@@ -186,7 +186,7 @@ namespace primitive.Core
             {
                 state.Worker.Init(Current, Score);
                 var a = state.Energy();
-                state = Optimize.HillClimb(state, 100) as State;
+                state = StateModel.HillClimb(state, 100) as StateModel;
                 var b = state.Energy();
                 if (a == b)
                     break;
@@ -198,21 +198,21 @@ namespace primitive.Core
             return counter;
         }
 
-        private State runWorker(Worker worker, ShapeType t, int a, int n, int age, int m)
+        private StateModel runWorker(WorkerModel worker, ShapeType t, int a, int n, int age, int m)
         {
             return worker.BestHillClimbState(t, a, n, age, m);
         }
 
-        private State runWorkers(ShapeType t, int a, int n, int age, int m)
+        private StateModel runWorkers(ShapeType t, int a, int n, int age, int m)
         {
             var wn = Workers.Count;
-            var ch = new List<State>(wn);
+            var ch = new List<StateModel>(wn);
             var wm = m / wn;
             if (m % wn != 0)
                 wm++;
 
-            var parameters = new List<(Worker, ShapeType, int, int, int, int)>();
-            var results = new List<State>();
+            var parameters = new List<(WorkerModel, ShapeType, int, int, int, int)>();
+            var results = new List<StateModel>();
             var tasks = new List<Task>();
             for (int i = 0; i < wn; i++)
             {
@@ -243,7 +243,7 @@ namespace primitive.Core
             #endregion
 
             double bestEnergy = double.MaxValue;
-            State bestState = new State();
+            StateModel bestState = new StateModel();
             foreach (var res in results)
             {
                 double energy = res.Energy();

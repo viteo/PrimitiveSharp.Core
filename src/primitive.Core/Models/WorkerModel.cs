@@ -1,24 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using SixLabors.ImageSharp;
+﻿using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.Primitives;
+using System;
+using System.Collections.Generic;
 
 namespace primitive.Core
 {
-    public class Worker : IDisposable
+    public class WorkerModel : IDisposable
     {
         public int W { get; set; }
         public int H { get; set; }
-        public Image<Rgba32> Target { get; set; }
-        public Image<Rgba32> Current { get; set; }
-        public Image<Rgba32> Buffer { get; set; }
-        public List<Scanline> Lines { get; set; }
         public Random Rnd { get; set; }
-        public double Score { get; set; }
         public int Counter { get; set; }
 
-        public Worker(Image<Rgba32> target)
+        private Image<Rgba32> Target { get; set; }
+        private Image<Rgba32> Current { get; set; }
+        private Image<Rgba32> Buffer { get; set; }
+        private List<ScanlineModel> Lines { get; set; }
+        private double Score { get; set; }
+
+        public WorkerModel(Image<Rgba32> target)
         {
             var w = target.Width;
             var h = target.Height;
@@ -26,7 +26,7 @@ namespace primitive.Core
             H = h;
             Target = target;
             Buffer = new Image<Rgba32>(target.Width, target.Height);
-            Lines = new List<Scanline>();
+            Lines = new List<ScanlineModel>();
             Rnd = new Random((int)DateTime.Now.Ticks);
         }
 
@@ -47,15 +47,15 @@ namespace primitive.Core
             return Core.DifferencePartial(Target, Current, Buffer, Score, lines);
         }
 
-        public State BestHillClimbState(ShapeType t, int a, int n, int age, int m)
+        public StateModel BestHillClimbState(ShapeType t, int a, int n, int age, int m)
         {
             double bestEnergy = 0;
-            IAnnealable bestState = new State();
+            StateModel bestState = new StateModel();
             for (int i = 0; i < m; i++)
             {
-                IAnnealable state = BestRandomState(t, a, n);
+                StateModel state = BestRandomState(t, a, n);
                 var before = state.Energy();
-                state = Optimize.HillClimb(state, age);
+                state = StateModel.HillClimb(state, age);
                 var energy = state.Energy();
                 if (i == 0 || energy < bestEnergy)
                 {
@@ -63,13 +63,13 @@ namespace primitive.Core
                     bestState = state;
                 }
             }
-            return bestState as State;
+            return bestState as StateModel;
         }
 
-        public State BestRandomState(ShapeType t, int a, int n)
+        public StateModel BestRandomState(ShapeType t, int a, int n)
         {
             double bestEnergy = 0;
-            State bestState = new State();
+            StateModel bestState = new StateModel();
             for (int i = 0; i < n; i++)
             {
                 var state = RandomState(t, a);
@@ -83,44 +83,44 @@ namespace primitive.Core
             return bestState;
         }
 
-        public State RandomState(ShapeType t, int a)
+        public StateModel RandomState(ShapeType t, int a)
         {
             switch (t)
             {
                 default:
                     return RandomState((ShapeType)(Rnd.Next(8) + 1), a);
                 case ShapeType.Triangle:
-                    return new State(this, new Polygon(this, 3, false), a);
+                    return new StateModel(this, new Polygon(this, 3, false), a);
                 case ShapeType.Rectangle:
-                    return new State(this, new RectangleStraight(this), a);
+                    return new StateModel(this, new RectangleStraight(this), a);
                 case ShapeType.Ellipse:
-                    return new State(this, new EllipseStrait(this, false), a);
+                    return new StateModel(this, new EllipseStrait(this, false), a);
                 case ShapeType.Circle:
-                    return new State(this, new EllipseStrait(this, true), a);
+                    return new StateModel(this, new EllipseStrait(this, true), a);
                 case ShapeType.RotatedRectangle:
-                    return new State(this, new RectangleRotated(this), a);
+                    return new StateModel(this, new RectangleRotated(this), a);
                 case ShapeType.BezierQuadratic:
-                    return new State(this, new BezierQuadratic(this), a);
+                    return new StateModel(this, new BezierQuadratic(this), a);
                 case ShapeType.RotatedEllipse:
-                    return new State(this, new EllipseRotated(this), a);
+                    return new StateModel(this, new EllipseRotated(this), a);
                 case ShapeType.Quadrilateral:
-                    return new State(this, new Polygon(this, 4, false), a);
+                    return new StateModel(this, new Polygon(this, 4, false), a);
                 case ShapeType.Square:
-                    return new State(this, new PolygonRegular(this, 4), a);
+                    return new StateModel(this, new PolygonRegular(this, 4), a);
                 case ShapeType.Pentagon:
-                    return new State(this, new PolygonRegular(this, 5), a);
+                    return new StateModel(this, new PolygonRegular(this, 5), a);
                 case ShapeType.Hexagon:
-                    return new State(this, new PolygonRegular(this, 6), a);
+                    return new StateModel(this, new PolygonRegular(this, 6), a);
                 case ShapeType.Octagon:
-                    return new State(this, new PolygonRegular(this, 7), a);
+                    return new StateModel(this, new PolygonRegular(this, 7), a);
                 case ShapeType.FourPointedStar:
-                    return new State(this, new StarRegular(this, 4), a);
+                    return new StateModel(this, new StarRegular(this, 4), a);
                 case ShapeType.Pentagram:
-                    return new State(this, new StarRegular(this, 5), a);
+                    return new StateModel(this, new StarRegular(this, 5), a);
                 case ShapeType.Hexagram:
-                    return new State(this, new StarRegular(this, 6), a);
+                    return new StateModel(this, new StarRegular(this, 6), a);
                 case ShapeType.Crescent:
-                    return new State(this, new Crescent(this), a);
+                    return new StateModel(this, new Crescent(this), a);
             }
         }
 

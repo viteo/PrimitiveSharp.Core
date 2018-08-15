@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using SixLabors.Primitives;
+﻿using SixLabors.Primitives;
 using SixLabors.Shapes;
+using System;
+using System.Collections.Generic;
 
 namespace primitive.Core
 {
@@ -11,7 +11,7 @@ namespace primitive.Core
         public bool Convex { get; set; }
         public PointF[] XY { get; set; }
 
-        public Polygon(Worker worker, int vertices, bool convex)
+        public Polygon(WorkerModel worker, int vertices, bool convex)
         {
             Worker = worker;
             Vertices = vertices;
@@ -27,7 +27,7 @@ namespace primitive.Core
             }
         }
 
-        public Polygon(Worker worker, int vertices, bool convex, PointF[] xy)
+        public Polygon(WorkerModel worker, int vertices, bool convex, PointF[] xy)
         {
             Worker = worker;
             Vertices = vertices;
@@ -66,14 +66,14 @@ namespace primitive.Core
                 else
                 {
                     var i = rnd.Next(Vertices);
-                    XY[i].X = (float)Util.Clamp(XY[i].X + rnd.NextGaussian() * 16, -m, w - 1 + m);
-                    XY[i].Y = (float)Util.Clamp(XY[i].Y + rnd.NextGaussian() * 16, -m, h - 1 + m);
+                    XY[i].X = (float)(XY[i].X + rnd.NextGaussian() * 16).Clamp(-m, w - 1 + m);
+                    XY[i].Y = (float)(XY[i].Y + rnd.NextGaussian() * 16).Clamp(-m, h - 1 + m);
                 }
                 if (Valid())
                     break;
             }
         }
-        
+
         public override string SVG(string attrs)
         {
             List<string> points = new List<string>();
@@ -118,7 +118,7 @@ namespace primitive.Core
         public double Radius { get; set; }
         public int Vertices { get; set; }
 
-        public PolygonRegular(Worker worker, int vertices)
+        public PolygonRegular(WorkerModel worker, int vertices)
         {
             Worker = worker;
             var rnd = Worker.Rnd;
@@ -132,7 +132,7 @@ namespace primitive.Core
             Angle = rnd.NextDouble() * 360;
         }
 
-        public PolygonRegular(Worker worker, PointF center, double angle, double radius, int vertices)
+        public PolygonRegular(WorkerModel worker, PointF center, double angle, double radius, int vertices)
         {
             Worker = worker;
             Vertices = vertices;
@@ -165,11 +165,11 @@ namespace primitive.Core
                 case 0:
                     Center = new PointF
                     {
-                        X = (float)Util.Clamp(Center.X + rnd.NextGaussian() * 16, 0, w - 1),
-                        Y = (float)Util.Clamp(Center.Y + rnd.NextGaussian() * 16, 0, h - 1)
+                        X = (float)(Center.X + rnd.NextGaussian() * 16).Clamp(0, w - 1),
+                        Y = (float)(Center.Y + rnd.NextGaussian() * 16).Clamp(0, h - 1)
                     }; break;
                 case 1:
-                    Radius = Util.Clamp(Radius + rnd.NextGaussian() * 16, 1, Math.Min(w, h) - 1); break;
+                    Radius = (Radius + rnd.NextGaussian() * 16).Clamp(1, Math.Min(w, h) - 1); break;
                 case 2:
                     Angle = Angle + rnd.NextGaussian() * 32; break;
             }

@@ -10,7 +10,7 @@ namespace primitive.Core
         public PointF P3 { get; set; }
         public float Width { get; set; }
 
-        public BezierQuadratic(Worker worker)
+        public BezierQuadratic(WorkerModel worker)
         {
             Worker = worker;
             var rnd = Worker.Rnd;
@@ -32,7 +32,7 @@ namespace primitive.Core
             Width = 1f / 2;
         }
 
-        public BezierQuadratic(Worker worker, PointF p1, PointF p2, PointF p3, float w)
+        public BezierQuadratic(WorkerModel worker, PointF p1, PointF p2, PointF p3, float w)
         {
             Worker = worker;
             P1 = p1;
@@ -66,29 +66,29 @@ namespace primitive.Core
                     case 0:
                         P1 = new PointF
                         {
-                            X = (float)Util.Clamp(P1.X + rnd.NextGaussian() * 16, -m, w - 1 + m),
-                            Y = (float)Util.Clamp(P1.Y + rnd.NextGaussian() * 16, -m, h - 1 + m)
+                            X = (float)(P1.X + rnd.NextGaussian() * 16).Clamp(-m, w - 1 + m),
+                            Y = (float)(P1.Y + rnd.NextGaussian() * 16).Clamp(-m, h - 1 + m)
                         }; break;
                     case 1:
                         P2 = new PointF
                         {
-                            X = (float)Util.Clamp(P2.X + rnd.NextGaussian() * 16, -m, w - 1 + m),
-                            Y = (float)Util.Clamp(P2.Y + rnd.NextGaussian() * 16, -m, h - 1 + m)
+                            X = (float)(P2.X + rnd.NextGaussian() * 16).Clamp(-m, w - 1 + m),
+                            Y = (float)(P2.Y + rnd.NextGaussian() * 16).Clamp(-m, h - 1 + m)
                         }; break;
                     case 2:
                         P3 = new PointF
                         {
-                            X = (float)Util.Clamp(P3.X + rnd.NextGaussian() * 16, -m, w - 1 + m),
-                            Y = (float)Util.Clamp(P3.Y + rnd.NextGaussian() * 16, -m, h - 1 + m)
+                            X = (float)(P3.X + rnd.NextGaussian() * 16).Clamp(-m, w - 1 + m),
+                            Y = (float)(P3.Y + rnd.NextGaussian() * 16).Clamp(-m, h - 1 + m)
                         }; break;
                     case 3:
-                        Width = (float)Util.Clamp(Width + rnd.NextGaussian(), 1, 16); break;
+                        Width = (float)(Width + rnd.NextGaussian()).Clamp(1, 16); break;
                 }
                 if (Valid())
                     break;
             }
         }
-        
+
         public override string SVG(string attrs)
         {
             attrs = attrs.Replace("fill", "stroke");

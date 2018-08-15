@@ -1,6 +1,6 @@
-﻿using System;
+﻿using SixLabors.Shapes;
+using System;
 using System.Collections.Generic;
-using SixLabors.Shapes;
 
 namespace primitive.Core
 {
@@ -12,7 +12,7 @@ namespace primitive.Core
         public int Ry { get; set; }
         public bool IsCircle { get; set; }
 
-        public EllipseStrait(Worker worker, bool isCircle)
+        public EllipseStrait(WorkerModel worker, bool isCircle)
         {
             Worker = worker;
             IsCircle = isCircle;
@@ -27,7 +27,7 @@ namespace primitive.Core
 
         }
 
-        public EllipseStrait(Worker worker, int x, int y, int rx, int ry, bool isCircle)
+        public EllipseStrait(WorkerModel worker, int x, int y, int rx, int ry, bool isCircle)
         {
             Worker = worker;
             X = x; Rx = rx;
@@ -58,27 +58,27 @@ namespace primitive.Core
             switch (rnd.Next(3))
             {
                 case 0:
-                    X = Util.Clamp(X + (int)(rnd.NextGaussian() * 16), 0, w - 1);
-                    Y = Util.Clamp(Y + (int)(rnd.NextGaussian() * 16), 0, h - 1);
+                    X = (X + (int)(rnd.NextGaussian() * 16)).Clamp(0, w - 1);
+                    Y = (Y + (int)(rnd.NextGaussian() * 16)).Clamp(0, h - 1);
                     break;
                 case 1:
-                    Rx = Util.Clamp(Rx + (int)(rnd.NextGaussian() * 16), 1, w - 1);
+                    Rx = (Rx + (int)(rnd.NextGaussian() * 16)).Clamp(1, w - 1);
                     if (IsCircle)
                         Ry = Rx;
                     break;
                 case 2:
-                    Ry = Util.Clamp(Ry + (int)(rnd.NextGaussian() * 16), 1, h - 1);
+                    Ry = (Ry + (int)(rnd.NextGaussian() * 16)).Clamp(1, h - 1);
                     if (IsCircle)
                         Rx = Ry;
                     break;
             }
         }
 
-        public override List<Scanline> Rasterize()
+        public override List<ScanlineModel> Rasterize()
         {
             var w = Worker.W;
             var h = Worker.H;
-            var lines = new List<Scanline>();
+            var lines = new List<ScanlineModel>();
             var aspect = (double)Rx / (double)Ry;
             for (int dy = 0; dy < Ry; dy++)
             {
@@ -94,9 +94,9 @@ namespace primitive.Core
                 if (x2 >= w)
                     x2 = w - 1;
                 if (y1 >= 0 && y1 < h)
-                    lines.Add(new Scanline { Alpha = 0xffff, X1 = x1, X2 = x2, Y = y1 });
+                    lines.Add(new ScanlineModel { Alpha = 0xffff, X1 = x1, X2 = x2, Y = y1 });
                 if (y2 >= 0 && y2 < h && dy > 0)
-                    lines.Add(new Scanline { Alpha = 0xffff, X1 = x1, X2 = x2, Y = y2 });
+                    lines.Add(new ScanlineModel { Alpha = 0xffff, X1 = x1, X2 = x2, Y = y2 });
             }
             return lines;
         }
@@ -110,7 +110,7 @@ namespace primitive.Core
         public double Ry { get; set; }
         public double Angle { get; set; }
 
-        public EllipseRotated(Worker worker)
+        public EllipseRotated(WorkerModel worker)
         {
             Worker = worker;
             var rnd = Worker.Rnd;
@@ -121,7 +121,7 @@ namespace primitive.Core
             Angle = rnd.NextDouble() * 360;
         }
 
-        public EllipseRotated(Worker worker, double x, double y, double rx, double ry, double a)
+        public EllipseRotated(WorkerModel worker, double x, double y, double rx, double ry, double a)
         {
             Worker = worker;
             X = x; Rx = rx;
@@ -152,11 +152,11 @@ namespace primitive.Core
             switch (rnd.Next(3))
             {
                 case 0:
-                    X = Util.Clamp(X + rnd.NextGaussian() * 16, 0, (double)(w - 1));
-                    Y = Util.Clamp(Y + rnd.NextGaussian() * 16, 0, (double)(h - 1)); break;
+                    X = (X + rnd.NextGaussian() * 16).Clamp(0, w - 1);
+                    Y = (Y + rnd.NextGaussian() * 16).Clamp(0, h - 1); break;
                 case 1:
-                    Rx = Util.Clamp(Rx + rnd.NextGaussian() * 16, 1, (double)(w - 1));
-                    Ry = Util.Clamp(Ry + rnd.NextGaussian() * 16, 1, (double)(w - 1)); break;
+                    Rx = (Rx + rnd.NextGaussian() * 16).Clamp(1, w - 1);
+                    Ry = (Ry + rnd.NextGaussian() * 16).Clamp(1, w - 1); break;
                 case 2:
                     Angle = Angle + rnd.NextGaussian() * 32; break;
             }
