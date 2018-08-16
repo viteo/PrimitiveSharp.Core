@@ -74,7 +74,7 @@ namespace primitive.Core
             }
         }
 
-        public override List<ScanlineModel> Rasterize()
+        protected override List<ScanlineModel> Rasterize()
         {
             var w = Worker.W;
             var h = Worker.H;

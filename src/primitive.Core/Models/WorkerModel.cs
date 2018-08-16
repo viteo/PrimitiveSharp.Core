@@ -41,7 +41,7 @@ namespace primitive.Core
         public double GetScore(IShape shape, int alpha)
         {
             Counter++;
-            var lines = shape.Rasterize();
+            var lines = shape.Lines;
             Rgba32 color = Core.ComputeColor(Target, Current, lines, alpha);
             Core.CopyLines(Buffer, Current, lines);
             Core.DrawLines(Buffer, color, lines);

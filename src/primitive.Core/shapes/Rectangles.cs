@@ -77,7 +77,7 @@ namespace primitive.Core
             }
         }
 
-        public override List<ScanlineModel> Rasterize()
+        protected override List<ScanlineModel> Rasterize()
         {
             CheckBounds();
             var lines = new List<ScanlineModel>();

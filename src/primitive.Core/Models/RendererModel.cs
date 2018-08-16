@@ -147,7 +147,7 @@ namespace primitive.Core
         private void Add(IShape shape, int alpha)
         {
             var before = Current.Clone();
-            var lines = shape.Rasterize();
+            var lines = shape.Lines;
             var color = Core.ComputeColor(Input, Current, lines, alpha);
             Core.DrawLines(Current, color, lines);
             var score = Core.DifferencePartial(Input, before, Current, Score, lines);
