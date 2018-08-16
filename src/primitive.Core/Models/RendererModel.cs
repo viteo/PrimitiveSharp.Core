@@ -17,7 +17,6 @@ namespace primitive.Core
         public int Repeat { get; set; }
         public double Scale { get; set; }
         public Rgba32 Background { get; set; }
-        public int WorkersCount { get; set; }
         public Image<Rgba32> Input { get; set; }
         public Image<Rgba32> Current { get; set; }
         public Image<Rgba32> Result;
@@ -48,7 +47,6 @@ namespace primitive.Core
             Alpha = parameters.Alpha;
             Repeat = parameters.Repeat;
             Background = parameters.Background;
-            WorkersCount = parameters.WorkersCount;
             Input = input;//.Clone();
             Current = Core.UniformImage(input.Width, input.Height, Background);
             Result = Core.UniformImage(Width, Height, Background);
@@ -59,7 +57,7 @@ namespace primitive.Core
             Scores = new List<double>();
             Workers = new List<WorkerModel>();
 
-            for (int i = 0; i < WorkersCount; i++)
+            for (int i = 0; i < parameters.WorkersCount; i++)
             {
                 var worker = new WorkerModel(Input);
                 Workers.Add(worker);
@@ -84,6 +82,120 @@ namespace primitive.Core
                 var elapsed = (DateTime.Now - start).TotalSeconds;
                 Logger.WriteLine(1, "{0:00}: t={1:G3}, score={2:G6}, n={3}, n/s={4}", frame, elapsed, Score, n, nps);
             }
+        }
+
+        private int Step(ShapeType shapeType, int alpha, int repeat)
+        {
+            var state = runWorkers(shapeType, alpha, 1000, 100, 16);
+            //state = Optimize.HillClimb(state, 1000) as State;
+            Add(state.Shape, state.Alpha);
+
+            for (int i = 0; i < repeat; i++)
+            {
+                state.Worker.Init(Current, Score);
+                var a = state.Energy();
+                state = StateModel.HillClimb(state, 100) as StateModel;
+                var b = state.Energy();
+                if (a == b)
+                    break;
+                Add(state.Shape, state.Alpha);
+            }
+            var counter = 0;
+            foreach (var worker in Workers)
+                counter += worker.Counter;
+            return counter;
+        }
+
+        private StateModel runWorkers(ShapeType t, int a, int n, int age, int m)
+        {
+            var wn = Workers.Count;
+            var ch = new List<StateModel>(wn);
+            var wm = m / wn;
+            if (m % wn != 0)
+                wm++;
+
+            var parameters = new List<(WorkerModel, ShapeType, int, int, int, int)>();
+            var results = new List<StateModel>();
+            var tasks = new List<Task>();
+            for (int i = 0; i < wn; i++)
+            {
+                var worker = Workers[i];
+                worker.Init(Current, Score);
+                parameters.Add((worker, t, a, n, age, wm));
+            }
+
+            #region Sequential
+            //foreach (var parameter in parameters)
+            //{
+            //    results.Add(runWorker(parameter.Item1, parameter.Item2, parameter.Item3, parameter.Item4, parameter.Item5, parameter.Item6));
+            //}
+            #endregion
+
+            #region Parallel
+            parameters.ForEach((parameter) =>
+            {
+                var task = Task.Factory.StartNew(() => { return runWorker(parameter.Item1, parameter.Item2, parameter.Item3, parameter.Item4, parameter.Item5, parameter.Item6); })
+                .ContinueWith((result) =>
+                {
+                    results.Add(result.Result);
+
+                });
+                tasks.Add(task);
+            });
+            Task.WaitAll(tasks.ToArray());
+            #endregion
+
+            double bestEnergy = double.MaxValue;
+            StateModel bestState = null;
+            foreach (var res in results)
+            {
+                double energy = res.Energy();
+                if (energy < bestEnergy)
+                {
+                    bestEnergy = energy;
+                    bestState = res;
+                }
+            }
+            return bestState;
+        }
+
+        private StateModel runWorker(WorkerModel worker, ShapeType t, int a, int n, int age, int m)
+        {
+            return worker.BestHillClimbState(t, a, n, age, m);
+        }
+
+        private void Add(IShape shape, int alpha)
+        {
+            var before = Current.Clone();
+            var lines = shape.Rasterize();
+            var color = Core.ComputeColor(Input, Current, lines, alpha);
+            Core.DrawLines(Current, color, lines);
+            var score = Core.DifferencePartial(Input, before, Current, Score, lines);
+
+            Score = score;
+            Shapes.Add(shape);
+            Colors.Add(color);
+            Scores.Add(score);
+
+            shape.Draw(Result, color, Scale);
+        }
+
+        private void Resize(Image<Rgba32> image, int canvasSize)
+        {
+            int width, height;
+            if (canvasSize >= image.Width && canvasSize >= image.Height)
+                return;
+            if (image.Width > image.Height)
+            {
+                width = canvasSize;
+                height = Convert.ToInt32(image.Height * canvasSize / (double)image.Width);
+            }
+            else
+            {
+                width = Convert.ToInt32(image.Width * canvasSize / (double)image.Height);
+                height = canvasSize;
+            }
+            image.Mutate(im => im.Resize(width, height));
         }
 
         public Image<Rgba32> GetFrames(bool saveFrames, int Nth = 1)
@@ -158,120 +270,6 @@ namespace primitive.Core
                 result.Add(String.Join("\n", lines));
             }
             return result;
-        }
-
-        private void Add(IShape shape, int alpha)
-        {
-            var before = Current.Clone();
-            var lines = shape.Rasterize();
-            var color = Core.ComputeColor(Input, Current, lines, alpha);
-            Core.DrawLines(Current, color, lines);
-            var score = Core.DifferencePartial(Input, before, Current, Score, lines);
-
-            Score = score;
-            Shapes.Add(shape);
-            Colors.Add(color);
-            Scores.Add(score);
-
-            shape.Draw(Result, color, Scale);
-        }
-
-        private int Step(ShapeType shapeType, int alpha, int repeat)
-        {
-            var state = runWorkers(shapeType, alpha, 1000, 100, 16);
-            //state = Optimize.HillClimb(state, 1000) as State;
-            Add(state.Shape, state.Alpha);
-
-            for (int i = 0; i < repeat; i++)
-            {
-                state.Worker.Init(Current, Score);
-                var a = state.Energy();
-                state = StateModel.HillClimb(state, 100) as StateModel;
-                var b = state.Energy();
-                if (a == b)
-                    break;
-                Add(state.Shape, state.Alpha);
-            }
-            var counter = 0;
-            foreach (var worker in Workers)
-                counter += worker.Counter;
-            return counter;
-        }
-
-        private StateModel runWorker(WorkerModel worker, ShapeType t, int a, int n, int age, int m)
-        {
-            return worker.BestHillClimbState(t, a, n, age, m);
-        }
-
-        private StateModel runWorkers(ShapeType t, int a, int n, int age, int m)
-        {
-            var wn = Workers.Count;
-            var ch = new List<StateModel>(wn);
-            var wm = m / wn;
-            if (m % wn != 0)
-                wm++;
-
-            var parameters = new List<(WorkerModel, ShapeType, int, int, int, int)>();
-            var results = new List<StateModel>();
-            var tasks = new List<Task>();
-            for (int i = 0; i < wn; i++)
-            {
-                var worker = Workers[i];
-                worker.Init(Current, Score);
-                parameters.Add((worker, t, a, n, age, wm));
-            }
-
-            #region Sequential
-            //foreach (var parameter in parameters)
-            //{
-            //    results.Add(runWorker(parameter.Item1, parameter.Item2, parameter.Item3, parameter.Item4, parameter.Item5, parameter.Item6));
-            //}
-            #endregion
-
-            #region Parallel
-            parameters.ForEach((parameter) =>
-            {
-                var task = Task.Factory.StartNew(() => { return runWorker(parameter.Item1, parameter.Item2, parameter.Item3, parameter.Item4, parameter.Item5, parameter.Item6); })
-                .ContinueWith((result) =>
-                {
-                    results.Add(result.Result);
-
-                });
-                tasks.Add(task);
-            });
-            Task.WaitAll(tasks.ToArray());
-            #endregion
-
-            double bestEnergy = double.MaxValue;
-            StateModel bestState = new StateModel();
-            foreach (var res in results)
-            {
-                double energy = res.Energy();
-                if (energy < bestEnergy)
-                {
-                    bestEnergy = energy;
-                    bestState = res;
-                }
-            }
-            return bestState;
-        }
-
-        private void Resize(Image<Rgba32> image, int canvasSize)
-        {
-            int width, height;
-            if (canvasSize >= image.Width && canvasSize >= image.Height)
-                return;
-            if (image.Width > image.Height)
-            {
-                width = canvasSize;
-                height = Convert.ToInt32(image.Height * canvasSize / (double)image.Width);
-            }
-            else
-            {
-                width = Convert.ToInt32(image.Width * canvasSize / (double)image.Height);
-                height = canvasSize;
-            }
-            image.Mutate(im => im.Resize(width, height));
         }
     }
 }
