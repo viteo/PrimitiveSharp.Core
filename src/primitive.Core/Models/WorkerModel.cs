@@ -27,6 +27,7 @@ namespace primitive.Core
             Target = target;
             Buffer = new Image<Rgba32>(target.Width, target.Height);
             Lines = new List<ScanlineModel>();
+            //Rnd = new Random(1);
             Rnd = new Random((int)DateTime.Now.Ticks);
         }
 
@@ -37,7 +38,7 @@ namespace primitive.Core
             Counter = 0;
         }
 
-        public double Energy(IShape shape, int alpha)
+        public double GetScore(IShape shape, int alpha)
         {
             Counter++;
             var lines = shape.Rasterize();
@@ -47,36 +48,36 @@ namespace primitive.Core
             return Core.DifferencePartial(Target, Current, Buffer, Score, lines);
         }
 
-        public StateModel BestHillClimbState(ShapeType t, int a, int n, int age, int m)
+        public StateModel BestState(ShapeType t, int a, int n, int age, int m)
         {
-            double bestEnergy = 0;
+            double bestScore = 0;
             StateModel bestState = new StateModel();
             for (int i = 0; i < m; i++)
             {
                 StateModel state = BestRandomState(t, a, n);
-                var before = state.Energy();
-                state = StateModel.HillClimb(state, age);
-                var energy = state.Energy();
-                if (i == 0 || energy < bestEnergy)
+                //StateModel state = RandomState(t, a);
+                state.HillClimb(age);
+                var score = state.Score;
+                if (i == 0 || score < bestScore)
                 {
-                    bestEnergy = energy;
+                    bestScore = score;
                     bestState = state;
                 }
             }
-            return bestState as StateModel;
+            return bestState;
         }
 
         public StateModel BestRandomState(ShapeType t, int a, int n)
         {
-            double bestEnergy = 0;
+            double bestScore = 0;
             StateModel bestState = new StateModel();
             for (int i = 0; i < n; i++)
             {
                 var state = RandomState(t, a);
-                var energy = state.Energy();
-                if (i == 0 || energy < bestEnergy)
+                var score = state.Score;
+                if (i == 0 || score < bestScore)
                 {
-                    bestEnergy = energy;
+                    bestScore = score;
                     bestState = state;
                 }
             }
@@ -119,8 +120,6 @@ namespace primitive.Core
                     return new StateModel(this, new StarRegular(this, 5), a);
                 case ShapeType.Hexagram:
                     return new StateModel(this, new StarRegular(this, 6), a);
-                case ShapeType.Crescent:
-                    return new StateModel(this, new Crescent(this), a);
             }
         }
 

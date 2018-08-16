@@ -6,7 +6,19 @@
         public IShape Shape { get; set; }
         public int Alpha { get; set; }
         public bool MutateAlpha { get; set; }
-        public double Score { get; set; }
+
+        private double score;
+        public double Score
+        {
+            get
+            {
+                if (score < 0)
+                {
+                    score = Worker.GetScore(Shape, Alpha);
+                }
+                return score;
+            }
+        }
 
         public StateModel() { }
 
@@ -21,19 +33,10 @@
             }
             Alpha = alpha;
             MutateAlpha = mutateAlpha;
-            Score = score;
+            this.score = score;
         }
 
-        public double Energy()
-        {
-            if (Score < 0)
-            {
-                Score = Worker.Energy(Shape, Alpha);
-            }
-            return Score;
-        }
-
-        public object DoMove()
+        public StateModel DoMove()
         {
             var rnd = Worker.Rnd;
             var oldState = Copy();
@@ -42,18 +45,15 @@
             {
                 Alpha = (Alpha + rnd.Next(21) - 10).Clamp(1, 255);
             }
-            Score = -1;
+            score = -1;
             return oldState;
         }
 
-        public void UndoMove(object undo)
+        public void UndoMove(StateModel undo)
         {
-            if (undo is StateModel oldState)
-            {
-                Shape = oldState.Shape;
-                Alpha = oldState.Alpha;
-                Score = oldState.Score;
-            }
+            Shape = undo.Shape;
+            Alpha = undo.Alpha;
+            score = undo.Score;
         }
 
         public StateModel Copy()
@@ -61,30 +61,25 @@
             return new StateModel(Worker, Shape.Copy(), Alpha, MutateAlpha, Score);
         }
 
-        public static StateModel HillClimb(StateModel state, int maxAge)
+        public void HillClimb(int maxAge)
         {
-            state = state.Copy();
-            var bestState = state.Copy();
-            var bestEnergy = state.Energy();
+            var bestScore = Score;
             int step = 0;
             for (int age = 0; age < maxAge; age++)
             {
-                var undo = state.DoMove();
-                var energy = state.Energy();
-                if (energy >= bestEnergy)
+                var undo = DoMove();
+                var score = Score;
+                if (score >= bestScore)
                 {
-                    state.UndoMove(undo);
+                    UndoMove(undo);
                 }
                 else
                 {
-                    //Console.WriteLine("step: {0}, energy: {1:G6}", step, energy);
-                    bestEnergy = energy;
-                    bestState = state.Copy();
+                    bestScore = score;
                     age = -1;
                 }
                 step++;
             }
-            return bestState;
         }
     }
 }

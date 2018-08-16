@@ -87,15 +87,14 @@ namespace primitive.Core
         private int Step(ShapeType shapeType, int alpha, int repeat)
         {
             var state = runWorkers(shapeType, alpha, 1000, 100, 16);
-            //state = Optimize.HillClimb(state, 1000) as State;
             Add(state.Shape, state.Alpha);
 
             for (int i = 0; i < repeat; i++)
             {
                 state.Worker.Init(Current, Score);
-                var a = state.Energy();
-                state = StateModel.HillClimb(state, 100) as StateModel;
-                var b = state.Energy();
+                var a = state.Score;
+                state.HillClimb(100);
+                var b = state.Score;
                 if (a == b)
                     break;
                 Add(state.Shape, state.Alpha);
@@ -115,7 +114,7 @@ namespace primitive.Core
 
             var results = new List<StateModel>();
 
-            //for(int i = 0; i < wn; i++)
+            //for (int i = 0; i < wn; i++)
             //{
             //    Workers[i].Init(Current, Score);
             //    results.Add(runWorker(Workers[i], t, a, n, age, wm));
@@ -127,15 +126,14 @@ namespace primitive.Core
                 results.Add(runWorker(Workers[i], t, a, n, age, wm));
             });
 
-            double bestEnergy = double.MaxValue;
-            StateModel bestState = null;
-            foreach (var res in results)
+            double bestScore = results[0].Score;
+            StateModel bestState = results[0];
+            foreach (var result in results)
             {
-                double energy = res.Energy();
-                if (energy < bestEnergy)
+                if (result.Score < bestScore)
                 {
-                    bestEnergy = energy;
-                    bestState = res;
+                    bestScore = result.Score;
+                    bestState = result;
                 }
             }
             return bestState;
@@ -143,7 +141,7 @@ namespace primitive.Core
 
         private StateModel runWorker(WorkerModel worker, ShapeType t, int a, int n, int age, int m)
         {
-            return worker.BestHillClimbState(t, a, n, age, m);
+            return worker.BestState(t, a, n, age, m);
         }
 
         private void Add(IShape shape, int alpha)
