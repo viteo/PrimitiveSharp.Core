@@ -109,41 +109,23 @@ namespace primitive.Core
         private StateModel runWorkers(ShapeType t, int a, int n, int age, int m)
         {
             var wn = Workers.Count;
-            var ch = new List<StateModel>(wn);
             var wm = m / wn;
             if (m % wn != 0)
                 wm++;
 
-            var parameters = new List<(WorkerModel, ShapeType, int, int, int, int)>();
             var results = new List<StateModel>();
-            var tasks = new List<Task>();
-            for (int i = 0; i < wn; i++)
-            {
-                var worker = Workers[i];
-                worker.Init(Current, Score);
-                parameters.Add((worker, t, a, n, age, wm));
-            }
 
-            #region Sequential
-            //foreach (var parameter in parameters)
+            //for(int i = 0; i < wn; i++)
             //{
-            //    results.Add(runWorker(parameter.Item1, parameter.Item2, parameter.Item3, parameter.Item4, parameter.Item5, parameter.Item6));
+            //    Workers[i].Init(Current, Score);
+            //    results.Add(runWorker(Workers[i], t, a, n, age, wm));
             //}
-            #endregion
 
-            #region Parallel
-            parameters.ForEach((parameter) =>
+            Parallel.For(0, wn, i =>
             {
-                var task = Task.Factory.StartNew(() => { return runWorker(parameter.Item1, parameter.Item2, parameter.Item3, parameter.Item4, parameter.Item5, parameter.Item6); })
-                .ContinueWith((result) =>
-                {
-                    results.Add(result.Result);
-
-                });
-                tasks.Add(task);
+                Workers[i].Init(Current, Score);
+                results.Add(runWorker(Workers[i], t, a, n, age, wm));
             });
-            Task.WaitAll(tasks.ToArray());
-            #endregion
 
             double bestEnergy = double.MaxValue;
             StateModel bestState = null;
