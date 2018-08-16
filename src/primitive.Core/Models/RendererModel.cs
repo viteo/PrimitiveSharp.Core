@@ -28,7 +28,7 @@ namespace primitive.Core
 
         public RendererModel(Image<Rgba32> input, ParametersModel parameters)
         {
-            Resize(input, parameters.CanvasResize);
+            input.Resize(parameters.CanvasResize);
             double aspect = input.Width / (double)input.Height;
             if (aspect >= 1)
             {
@@ -158,24 +158,6 @@ namespace primitive.Core
             Scores.Add(score);
 
             shape.Draw(Result, color, Scale);
-        }
-
-        private void Resize(Image<Rgba32> image, int canvasSize)
-        {
-            int width, height;
-            if (canvasSize >= image.Width && canvasSize >= image.Height)
-                return;
-            if (image.Width > image.Height)
-            {
-                width = canvasSize;
-                height = Convert.ToInt32(image.Height * canvasSize / (double)image.Width);
-            }
-            else
-            {
-                width = Convert.ToInt32(image.Width * canvasSize / (double)image.Height);
-                height = canvasSize;
-            }
-            image.Mutate(im => im.Resize(width, height));
         }
 
         public Image<Rgba32> GetFrames(bool saveFrames, int Nth = 1)

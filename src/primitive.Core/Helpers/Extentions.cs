@@ -1,4 +1,7 @@
-﻿using System;
+﻿using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using System;
 
 namespace primitive.Core
 {
@@ -28,6 +31,24 @@ namespace primitive.Core
             if (value.CompareTo(min) < 0)
                 result = min;
             return result;
+        }
+
+        public static void Resize(this Image<Rgba32> image, int canvasSize)
+        {
+            int width, height;
+            if (canvasSize >= image.Width && canvasSize >= image.Height)
+                return;
+            if (image.Width > image.Height)
+            {
+                width = canvasSize;
+                height = Convert.ToInt32(image.Height * canvasSize / (double)image.Width);
+            }
+            else
+            {
+                width = Convert.ToInt32(image.Width * canvasSize / (double)image.Height);
+                height = canvasSize;
+            }
+            image.Mutate(im => im.Resize(width, height));
         }
     }
 }
