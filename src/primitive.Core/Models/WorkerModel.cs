@@ -15,7 +15,6 @@ namespace primitive.Core
         private Image<Rgba32> Target { get; set; }
         private Image<Rgba32> Current { get; set; }
         private Image<Rgba32> Buffer { get; set; }
-        private List<ScanlineModel> Lines { get; set; }
         private double Score { get; set; }
 
         public WorkerModel(Image<Rgba32> target)
@@ -26,7 +25,6 @@ namespace primitive.Core
             H = h;
             Target = target;
             Buffer = new Image<Rgba32>(target.Width, target.Height);
-            Lines = new List<ScanlineModel>();
             //Rnd = new Random(1);
             Rnd = new Random((int)DateTime.Now.Ticks);
         }
