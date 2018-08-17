@@ -87,7 +87,7 @@ namespace primitive.Core
         private int Step(ShapeType shapeType, int alpha, int repeat)
         {
             var state = runWorkers(shapeType, alpha, 1000, 100, 16);
-            Add(state.Shape, state.Alpha);
+            Add(state.Shape, state.Alpha, state.Score);
 
             for (int i = 0; i < repeat; i++)
             {
@@ -97,7 +97,7 @@ namespace primitive.Core
                 var b = state.Score;
                 if (a == b)
                     break;
-                Add(state.Shape, state.Alpha);
+                Add(state.Shape, state.Alpha, state.Score);
             }
             var counter = 0;
             foreach (var worker in Workers)
@@ -144,13 +144,12 @@ namespace primitive.Core
             return worker.BestState(t, a, n, age, m);
         }
 
-        private void Add(IShape shape, int alpha)
+        private void Add(IShape shape, int alpha, double score)
         {
             var before = Current.Clone();
             var lines = shape.Lines;
             var color = Core.ComputeColor(Input, Current, lines, alpha);
             Core.DrawLines(Current, color, lines);
-            var score = Core.DifferencePartial(Input, before, Current, Score, lines);
 
             Score = score;
             Shapes.Add(shape);
