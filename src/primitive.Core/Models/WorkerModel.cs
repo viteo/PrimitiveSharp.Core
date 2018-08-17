@@ -55,7 +55,7 @@ namespace primitive.Core
                 StateModel state = BestRandomState(t, a, n);
                 //StateModel state = RandomState(t, a);
                 state.HillClimb(age);
-                var score = state.Score;
+                var score = state.Score();
                 if (i == 0 || score < bestScore)
                 {
                     bestScore = score;
@@ -72,7 +72,7 @@ namespace primitive.Core
             for (int i = 0; i < n; i++)
             {
                 var state = RandomState(t, a);
-                var score = state.Score;
+                var score = state.Score();
                 if (i == 0 || score < bestScore)
                 {
                     bestScore = score;

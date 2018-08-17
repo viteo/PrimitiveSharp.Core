@@ -87,17 +87,17 @@ namespace primitive.Core
         private int Step(ShapeType shapeType, int alpha, int repeat)
         {
             var state = runWorkers(shapeType, alpha, 1000, 100, 16);
-            Add(state.Shape, state.Alpha, state.Score);
+            Add(state.Shape, state.Alpha, state.Score());
 
             for (int i = 0; i < repeat; i++)
             {
                 state.Worker.Init(Current, Score);
-                var a = state.Score;
+                var a = state.Score();
                 state.HillClimb(100);
-                var b = state.Score;
+                var b = state.Score();
                 if (a == b)
                     break;
-                Add(state.Shape, state.Alpha, state.Score);
+                Add(state.Shape, state.Alpha, state.Score());
             }
             var counter = 0;
             foreach (var worker in Workers)
@@ -126,13 +126,13 @@ namespace primitive.Core
             //    results.Add(runWorker(Workers[i], t, a, n, age, wm));
             //});
 
-            double bestScore = results[0].Score;
+            double bestScore = results[0].Score();
             StateModel bestState = results[0];
             foreach (var result in results)
             {
-                if (result.Score < bestScore)
+                if (result.Score() < bestScore)
                 {
-                    bestScore = result.Score;
+                    bestScore = result.Score();
                     bestState = result;
                 }
             }

@@ -6,19 +6,7 @@
         public IShape Shape { get; set; }
         public int Alpha { get; set; }
         public bool MutateAlpha { get; set; }
-
         private double score;
-        public double Score
-        {
-            get
-            {
-                if (score < 0)
-                {
-                    score = Worker.GetScore(Shape, Alpha);
-                }
-                return score;
-            }
-        }
 
         public StateModel() { }
 
@@ -34,6 +22,15 @@
             Alpha = alpha;
             MutateAlpha = mutateAlpha;
             this.score = score;
+        }
+        
+        public double Score()
+        {
+            if (score < 0)
+            {
+                score = Worker.GetScore(Shape, Alpha);
+            }
+            return score;
         }
 
         public StateModel DoMove()
@@ -53,22 +50,22 @@
         {
             Shape = undo.Shape;
             Alpha = undo.Alpha;
-            score = undo.Score;
+            score = undo.Score();
         }
 
         public StateModel Copy()
         {
-            return new StateModel(Worker, Shape.Copy(), Alpha, MutateAlpha, Score);
+            return new StateModel(Worker, Shape.Copy(), Alpha, MutateAlpha, Score());
         }
 
         public void HillClimb(int maxAge)
         {
-            var bestScore = Score;
+            var bestScore = Score();
             int step = 0;
             for (int age = 0; age < maxAge; age++)
             {
                 var undo = DoMove();
-                var score = Score;
+                var score = Score();
                 if (score >= bestScore)
                 {
                     UndoMove(undo);
