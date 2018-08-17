@@ -33,12 +33,12 @@ namespace primitive.Core
     public interface IShape
     {
         WorkerModel Worker { get; set; }
-        List<ScanlineModel> Lines { get; }
         IShape Copy();
         IPath GetPath();
         void Draw(Image<Rgba32> image, Rgba32 color, double scale);
         void Mutate();
         string SVG(string attrs);
+        List<ScanlineModel> Rasterize();
     }
 
     public abstract class Shape : IShape
@@ -50,26 +50,13 @@ namespace primitive.Core
         public abstract void Mutate();
         public abstract string SVG(string attrs);
 
-        protected List<ScanlineModel> lines;
-        public List<ScanlineModel> Lines
-        {
-            get
-            {
-                if(lines == null || lines.Count == 0)
-                {
-                    lines = this.Rasterize();
-                }
-                return lines;
-            }
-        }
-
         public virtual void Draw(Image<Rgba32> image, Rgba32 color, double scale)
         {
             image.Mutate(im => im
                 .Fill(color, GetPath().Transform(Matrix3x2.CreateScale((float)scale))));
         }
 
-        protected virtual List<ScanlineModel> Rasterize()
+        public virtual List<ScanlineModel> Rasterize()
         {
             List<ScanlineModel> lines = new List<ScanlineModel>();
 
