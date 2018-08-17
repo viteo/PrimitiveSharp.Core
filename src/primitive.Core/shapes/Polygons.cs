@@ -49,7 +49,7 @@ namespace primitive.Core
             return pb.Build();
         }
 
-        public override void Mutate()
+        protected override void MutateImpl()
         {
             const int m = 16;
             var w = Worker.W;
@@ -155,7 +155,7 @@ namespace primitive.Core
             return pb.Build();
         }
 
-        public override void Mutate()
+        protected override void MutateImpl()
         {
             var w = Worker.W;
             var h = Worker.H;

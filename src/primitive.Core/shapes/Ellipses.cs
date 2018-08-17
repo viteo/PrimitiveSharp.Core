@@ -50,7 +50,7 @@ namespace primitive.Core
             return new EllipseStrait(Worker, X, Y, Rx, Ry, IsCircle);
         }
 
-        public override void Mutate()
+        protected override void MutateImpl()
         {
             var w = Worker.W;
             var h = Worker.H;
@@ -74,7 +74,7 @@ namespace primitive.Core
             }
         }
 
-        public override List<ScanlineModel> Rasterize()
+        protected override List<ScanlineModel> Rasterize()
         {
             var w = Worker.W;
             var h = Worker.H;
@@ -144,7 +144,7 @@ namespace primitive.Core
             return new EllipseRotated(Worker, X, Y, Rx, Ry, Angle);
         }
 
-        public override void Mutate()
+        protected override void MutateImpl()
         {
             var w = Worker.W;
             var h = Worker.H;

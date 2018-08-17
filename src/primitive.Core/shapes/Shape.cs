@@ -38,17 +38,24 @@ namespace primitive.Core
         void Draw(Image<Rgba32> image, Rgba32 color, double scale);
         void Mutate();
         string SVG(string attrs);
-        List<ScanlineModel> Rasterize();
+        List<ScanlineModel> GetScanlines();
     }
 
     public abstract class Shape : IShape
     {
         private static readonly Comparer<PointF> comparer = Comparer<PointF>.Create((a, b) => a.X.CompareTo(b.X));
+        private List<ScanlineModel> scanlines;
         public WorkerModel Worker { get; set; }
         public abstract IShape Copy();
         public abstract IPath GetPath();
-        public abstract void Mutate();
         public abstract string SVG(string attrs);
+        protected abstract void MutateImpl();
+
+        public void Mutate()
+        {
+            MutateImpl();
+            scanlines?.Clear();
+        }
 
         public virtual void Draw(Image<Rgba32> image, Rgba32 color, double scale)
         {
@@ -56,7 +63,14 @@ namespace primitive.Core
                 .Fill(color, GetPath().Transform(Matrix3x2.CreateScale((float)scale))));
         }
 
-        public virtual List<ScanlineModel> Rasterize()
+        public List<ScanlineModel> GetScanlines()
+        {
+            if (scanlines == null || scanlines.Count == 0)
+                scanlines = Rasterize();
+            return scanlines;
+        }
+
+        protected virtual List<ScanlineModel> Rasterize()
         {
             List<ScanlineModel> lines = new List<ScanlineModel>();
 

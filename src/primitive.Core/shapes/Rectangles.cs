@@ -61,7 +61,7 @@ namespace primitive.Core
             return new RectangleStraight(Worker, X1, Y1, X2, Y2);
         }
 
-        public override void Mutate()
+        protected override void MutateImpl()
         {
             var w = Worker.W;
             var h = Worker.H;
@@ -77,7 +77,7 @@ namespace primitive.Core
             }
         }
 
-        public override List<ScanlineModel> Rasterize()
+        protected override List<ScanlineModel> Rasterize()
         {
             CheckBounds();
             var lines = new List<ScanlineModel>();
@@ -104,7 +104,7 @@ namespace primitive.Core
             Sy = rnd.Next(32) + 1;
             Angle = rnd.Next(360);
             Worker = worker;
-            Mutate();
+            MutateImpl();
         }
 
         public RectangleRotated(WorkerModel worker, int x, int y, int sx, int sy, int angle)
@@ -139,7 +139,7 @@ namespace primitive.Core
             return new RectangleRotated(Worker, X, Y, Sx, Sy, Angle);
         }
 
-        public override void Mutate()
+        protected override void MutateImpl()
         {
             var w = Worker.W;
             var h = Worker.H;
