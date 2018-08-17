@@ -29,12 +29,5 @@ namespace primitive.Core
         {
             return radians * 180 / Math.PI;
         }
-
-        public static (double rx, double ry) Rotate(double x, double y, double theta)
-        {
-            double rx = x * Math.Cos(theta) - y * Math.Sin(theta);
-            double ry = x * Math.Sin(theta) + y * Math.Cos(theta);
-            return (rx, ry);
-        }
     }
 }

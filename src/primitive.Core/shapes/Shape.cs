@@ -55,7 +55,7 @@ namespace primitive.Core
         {
             get
             {
-                if(lines == null)
+                if(lines == null || lines.Count == 0)
                 {
                     lines = this.Rasterize();
                 }

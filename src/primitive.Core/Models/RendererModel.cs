@@ -114,17 +114,17 @@ namespace primitive.Core
 
             var results = new List<StateModel>();
 
-            //for (int i = 0; i < wn; i++)
-            //{
-            //    Workers[i].Init(Current, Score);
-            //    results.Add(runWorker(Workers[i], t, a, n, age, wm));
-            //}
-
-            Parallel.For(0, wn, i =>
+            for (int i = 0; i < wn; i++)
             {
                 Workers[i].Init(Current, Score);
                 results.Add(runWorker(Workers[i], t, a, n, age, wm));
-            });
+            }
+
+            //Parallel.For(0, wn, i =>
+            //{
+            //    Workers[i].Init(Current, Score);
+            //    results.Add(runWorker(Workers[i], t, a, n, age, wm));
+            //});
 
             double bestScore = results[0].Score;
             StateModel bestState = results[0];

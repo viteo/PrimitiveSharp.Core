@@ -173,7 +173,6 @@ namespace primitive.Core
                 case 2:
                     Angle = Angle + rnd.NextGaussian() * 32; break;
             }
-
         }
 
         public override string SVG(string attrs)
