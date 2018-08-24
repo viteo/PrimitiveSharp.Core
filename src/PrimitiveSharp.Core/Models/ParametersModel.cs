@@ -15,5 +15,7 @@ namespace PrimitiveSharp.Core
         public int WorkersCount { get; set; } = Environment.ProcessorCount;
         public int NthFrame { get; set; } = 1;
         public int LogLevel { get; set; } = 0;
+        public int ShapeProbeCount { get; set; } = 1000;
+        public int ShapeAge { get; set; } = 100;
     }
 }
