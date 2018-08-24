@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace primitive.Core
+namespace PrimitiveSharp.Core
 {
     public static class Logger
     {

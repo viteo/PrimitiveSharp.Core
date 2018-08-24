@@ -4,7 +4,7 @@ using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using System;
 
-namespace primitive.Core
+namespace PrimitiveSharp.Core
 {
     public static class Util
     {

@@ -1,4 +1,4 @@
-﻿namespace primitive.Core
+﻿namespace PrimitiveSharp.Core
 {
     public class StateModel
     {

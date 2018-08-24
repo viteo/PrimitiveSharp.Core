@@ -4,7 +4,7 @@ using System;
 
 using System.Collections.Generic;
 
-namespace primitive.Core
+namespace PrimitiveSharp.Core
 {
     public static class File
     {

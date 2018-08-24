@@ -1,7 +1,7 @@
 ﻿using SixLabors.Primitives;
 using SixLabors.Shapes;
 
-namespace primitive.Core
+namespace PrimitiveSharp.Core
 {
     public class BezierQuadratic : Shape
     {

@@ -2,6 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageTags>svg primitive imageprocessing imagesharp</PackageTags>
+    <Authors>Viktor (viteo), Michael (fogleman)</Authors>
+    <Company>Community</Company>
+    <RepositoryUrl>https://github.com/viteo/PrimitiveSharp.Core</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReleaseNotes>Initial release</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

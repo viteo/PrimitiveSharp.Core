@@ -3,7 +3,7 @@ using SixLabors.Shapes;
 using System;
 using System.Collections.Generic;
 
-namespace primitive.Core
+namespace PrimitiveSharp.Core
 {
     public class StarRegular : PolygonRegular
     {

@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 
-namespace primitive.Core
+namespace PrimitiveSharp.Core
 {
     public enum ShapeType
     {

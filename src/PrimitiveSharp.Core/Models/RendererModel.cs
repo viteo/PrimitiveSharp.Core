@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace primitive.Core
+namespace PrimitiveSharp.Core
 {
     public class RendererModel
     {

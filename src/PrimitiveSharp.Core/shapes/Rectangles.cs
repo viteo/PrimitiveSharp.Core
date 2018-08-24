@@ -1,7 +1,7 @@
 ﻿using SixLabors.Shapes;
 using System.Collections.Generic;
 
-namespace primitive.Core
+namespace PrimitiveSharp.Core
 {
     public class RectangleStraight : Shape
     {
