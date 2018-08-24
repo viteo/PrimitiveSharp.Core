@@ -5,6 +5,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="shapes\Crescent.cs" />
+    <Compile Remove="shapes\Lines.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="shapes\Crescent.cs" />
+    <None Include="shapes\Lines.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0005" />
     <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta0005" />
   </ItemGroup>
