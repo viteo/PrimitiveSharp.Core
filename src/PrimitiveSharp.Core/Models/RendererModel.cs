@@ -105,7 +105,7 @@ namespace PrimitiveSharp.Core
             return counter;
         }
 
-        private StateModel runWorkers(ShapeType t, int a, int n, int age, int m)
+        private StateModel runWorkers(ShapeType shapeType, int alpha, int shapeProbeCount, int shapeAge, int m)
         {
             var wn = Workers.Count;
             var wm = m / wn;
@@ -123,7 +123,7 @@ namespace PrimitiveSharp.Core
             Parallel.For(0, wn, i =>
             {
                 Workers[i].Init(Current, Score);
-                results.Add(runWorker(Workers[i], t, a, n, age, wm));
+                results.Add(runWorker(Workers[i], shapeType, alpha, shapeProbeCount, shapeAge, wm));
             });
 
             double bestScore = results[0].Score();
@@ -139,9 +139,9 @@ namespace PrimitiveSharp.Core
             return bestState;
         }
 
-        private StateModel runWorker(WorkerModel worker, ShapeType t, int a, int n, int age, int m)
+        private StateModel runWorker(WorkerModel worker, ShapeType shapeType, int alpha, int shapeProbeCount, int shapeAge, int m)
         {
-            return worker.BestState(t, a, n, age, m);
+            return worker.BestState(shapeType, alpha, shapeProbeCount, shapeAge, m);
         }
 
         private void Add(IShape shape, int alpha, double score)

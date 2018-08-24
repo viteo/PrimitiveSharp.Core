@@ -46,15 +46,15 @@ namespace PrimitiveSharp.Core
             return Core.DifferencePartial(Target, Current, Buffer, Score, lines);
         }
 
-        public StateModel BestState(ShapeType t, int a, int n, int age, int m)
+        public StateModel BestState(ShapeType shapeType, int alpha, int shapeProbeCount, int shapeAge, int m)
         {
             double bestScore = 0;
             StateModel bestState = new StateModel();
             for (int i = 0; i < m; i++)
             {
-                StateModel state = BestRandomState(t, a, n);
+                StateModel state = BestRandomState(shapeType, alpha, shapeProbeCount);
                 //StateModel state = RandomState(t, a);
-                state.HillClimb(age);
+                state.HillClimb(shapeAge);
                 var score = state.Score();
                 if (i == 0 || score < bestScore)
                 {
@@ -65,13 +65,13 @@ namespace PrimitiveSharp.Core
             return bestState;
         }
 
-        public StateModel BestRandomState(ShapeType t, int a, int n)
+        public StateModel BestRandomState(ShapeType shapeType, int apha, int shapeProbeCount)
         {
             double bestScore = 0;
             StateModel bestState = new StateModel();
-            for (int i = 0; i < n; i++)
+            for (int i = 0; i < shapeProbeCount; i++)
             {
-                var state = RandomState(t, a);
+                var state = RandomState(shapeType, apha);
                 var score = state.Score();
                 if (i == 0 || score < bestScore)
                 {
@@ -82,42 +82,42 @@ namespace PrimitiveSharp.Core
             return bestState;
         }
 
-        public StateModel RandomState(ShapeType t, int a)
+        public StateModel RandomState(ShapeType shapeType, int alpha)
         {
-            switch (t)
+            switch (shapeType)
             {
                 default:
-                    return RandomState((ShapeType)(Rnd.Next(8) + 1), a);
+                    return RandomState((ShapeType)(Rnd.Next(8) + 1), alpha);
                 case ShapeType.Triangle:
-                    return new StateModel(this, new Polygon(this, 3, false), a);
+                    return new StateModel(this, new Polygon(this, 3, false), alpha);
                 case ShapeType.Rectangle:
-                    return new StateModel(this, new RectangleStraight(this), a);
+                    return new StateModel(this, new RectangleStraight(this), alpha);
                 case ShapeType.Ellipse:
-                    return new StateModel(this, new EllipseStrait(this, false), a);
+                    return new StateModel(this, new EllipseStrait(this, false), alpha);
                 case ShapeType.Circle:
-                    return new StateModel(this, new EllipseStrait(this, true), a);
+                    return new StateModel(this, new EllipseStrait(this, true), alpha);
                 case ShapeType.RotatedRectangle:
-                    return new StateModel(this, new RectangleRotated(this), a);
+                    return new StateModel(this, new RectangleRotated(this), alpha);
                 case ShapeType.BezierQuadratic:
-                    return new StateModel(this, new BezierQuadratic(this), a);
+                    return new StateModel(this, new BezierQuadratic(this), alpha);
                 case ShapeType.RotatedEllipse:
-                    return new StateModel(this, new EllipseRotated(this), a);
+                    return new StateModel(this, new EllipseRotated(this), alpha);
                 case ShapeType.Quadrilateral:
-                    return new StateModel(this, new Polygon(this, 4, false), a);
+                    return new StateModel(this, new Polygon(this, 4, false), alpha);
                 case ShapeType.Square:
-                    return new StateModel(this, new PolygonRegular(this, 4), a);
+                    return new StateModel(this, new PolygonRegular(this, 4), alpha);
                 case ShapeType.Pentagon:
-                    return new StateModel(this, new PolygonRegular(this, 5), a);
+                    return new StateModel(this, new PolygonRegular(this, 5), alpha);
                 case ShapeType.Hexagon:
-                    return new StateModel(this, new PolygonRegular(this, 6), a);
+                    return new StateModel(this, new PolygonRegular(this, 6), alpha);
                 case ShapeType.Octagon:
-                    return new StateModel(this, new PolygonRegular(this, 7), a);
+                    return new StateModel(this, new PolygonRegular(this, 7), alpha);
                 case ShapeType.FourPointedStar:
-                    return new StateModel(this, new StarRegular(this, 4), a);
+                    return new StateModel(this, new StarRegular(this, 4), alpha);
                 case ShapeType.Pentagram:
-                    return new StateModel(this, new StarRegular(this, 5), a);
+                    return new StateModel(this, new StarRegular(this, 5), alpha);
                 case ShapeType.Hexagram:
-                    return new StateModel(this, new StarRegular(this, 6), a);
+                    return new StateModel(this, new StarRegular(this, 6), alpha);
             }
         }
 
