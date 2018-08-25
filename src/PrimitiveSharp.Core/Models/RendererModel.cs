@@ -2,6 +2,7 @@
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -112,7 +113,7 @@ namespace PrimitiveSharp.Core
             if (m % wn != 0)
                 wm++;
 
-            var results = new List<StateModel>();
+            var results = new ConcurrentBag<StateModel>();
 
             //for (int i = 0; i < wn; i++)
             //{
@@ -126,8 +127,10 @@ namespace PrimitiveSharp.Core
                 results.Add(runWorker(Workers[i], shapeType, alpha, shapeProbeCount, shapeAge, wm));
             });
 
-            double bestScore = results[0].Score();
-            StateModel bestState = results[0];
+            StateModel bestState;
+            results.TryTake(out bestState);
+            double bestScore = bestState.Score();
+            
             foreach (var result in results)
             {
                 if (result.Score() < bestScore)
