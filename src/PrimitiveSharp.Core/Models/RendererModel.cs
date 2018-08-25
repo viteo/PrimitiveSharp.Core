@@ -22,10 +22,13 @@ namespace PrimitiveSharp.Core
         public Image<Rgba32> Current { get; set; }
         public Image<Rgba32> Result;
         public double Score { get; set; }
+        public int ShapeProbeCount { get; set; }
+        public int ShapeAge { get; set; }
         private List<IShape> Shapes { get; set; }
         private List<Rgba32> Colors { get; set; }
         private List<double> Scores { get; set; }
         private List<WorkerModel> Workers { get; set; }
+
 
         public RendererModel(Image<Rgba32> input, ParametersModel parameters)
         {
@@ -48,6 +51,8 @@ namespace PrimitiveSharp.Core
             Alpha = parameters.Alpha;
             Repeat = parameters.Repeat;
             Background = parameters.Background;
+            ShapeProbeCount = parameters.ShapeProbeCount;
+            ShapeAge = parameters.ShapeAge;
             Input = input;//.Clone();
             Current = Core.UniformImage(input.Width, input.Height, Background);
             Result = Core.UniformImage(Width, Height, Background);
@@ -87,7 +92,7 @@ namespace PrimitiveSharp.Core
 
         private int Step(ShapeType shapeType, int alpha, int repeat)
         {
-            var state = runWorkers(shapeType, alpha, 1000, 100, 16);
+            var state = RunWorkers(shapeType, alpha, ShapeProbeCount, ShapeAge, 16);
             Add(state.Shape, state.Alpha, state.Score());
 
             for (int i = 0; i < repeat; i++)
@@ -106,7 +111,7 @@ namespace PrimitiveSharp.Core
             return counter;
         }
 
-        private StateModel runWorkers(ShapeType shapeType, int alpha, int shapeProbeCount, int shapeAge, int m)
+        private StateModel RunWorkers(ShapeType shapeType, int alpha, int shapeProbeCount, int shapeAge, int m)
         {
             var wn = Workers.Count;
             var wm = m / wn;
@@ -124,7 +129,7 @@ namespace PrimitiveSharp.Core
             Parallel.For(0, wn, i =>
             {
                 Workers[i].Init(Current, Score);
-                results.Add(runWorker(Workers[i], shapeType, alpha, shapeProbeCount, shapeAge, wm));
+                results.Add(RunWorker(Workers[i], shapeType, alpha, shapeProbeCount, shapeAge, wm));
             });
 
             StateModel bestState;
@@ -142,7 +147,7 @@ namespace PrimitiveSharp.Core
             return bestState;
         }
 
-        private StateModel runWorker(WorkerModel worker, ShapeType shapeType, int alpha, int shapeProbeCount, int shapeAge, int m)
+        private StateModel RunWorker(WorkerModel worker, ShapeType shapeType, int alpha, int shapeProbeCount, int shapeAge, int m)
         {
             return worker.BestState(shapeType, alpha, shapeProbeCount, shapeAge, m);
         }

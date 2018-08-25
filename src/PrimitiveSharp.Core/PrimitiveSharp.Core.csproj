@@ -8,10 +8,11 @@
     <Company>Community</Company>
     <RepositoryUrl>https://github.com/viteo/PrimitiveSharp.Core</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageReleaseNotes>Initial release</PackageReleaseNotes>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>1.0.0.0</FileVersion>
-    <Version>1.0.0</Version>
+    <PackageReleaseNotes>New parameters for fine tuning.</PackageReleaseNotes>
+    <AssemblyVersion>1.0.3.0</AssemblyVersion>
+    <FileVersion>1.0.3.0</FileVersion>
+    <Version>1.0.3</Version>
+    <Description>Reproducing images with geometric primitives.</Description>
   </PropertyGroup>
 
   <ItemGroup>
