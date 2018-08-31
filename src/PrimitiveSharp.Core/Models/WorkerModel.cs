@@ -82,12 +82,13 @@ namespace PrimitiveSharp.Core
             return bestState;
         }
 
+        private static readonly int shapeCount = Enum.GetNames(typeof(ShapeType)).Length;
         public StateModel RandomState(ShapeType shapeType, int alpha)
         {
             switch (shapeType)
             {
                 default:
-                    return RandomState((ShapeType)(Rnd.Next(8) + 1), alpha);
+                    return RandomState((ShapeType)(Rnd.Next(shapeCount)), alpha);
                 case ShapeType.Triangle:
                     return new StateModel(this, new Polygon(this, 3, false), alpha);
                 case ShapeType.Rectangle:
