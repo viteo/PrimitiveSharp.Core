@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageTags>svg primitive imageprocessing imagesharp</PackageTags>
     <Authors>Viktor (viteo), Michael (fogleman)</Authors>
@@ -13,6 +13,7 @@
     <FileVersion>1.0.3.0</FileVersion>
     <Version>1.0.3</Version>
     <Description>Reproducing images with geometric primitives.</Description>
+    <AssemblyName>PrimitiveSharp.Core</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,8 +27,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0005" />
-    <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta0005" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.3" />
+    <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta11" />
   </ItemGroup>
 
 </Project>

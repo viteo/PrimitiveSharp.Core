@@ -1,4 +1,4 @@
-﻿using SixLabors.Shapes;
+﻿using SixLabors.ImageSharp.Drawing;
 using System.Collections.Generic;
 
 namespace PrimitiveSharp.Core

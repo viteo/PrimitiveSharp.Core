@@ -1,5 +1,5 @@
-﻿using SixLabors.Primitives;
-using SixLabors.Shapes;
+﻿using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Drawing;
 
 namespace PrimitiveSharp.Core
 {

@@ -10,7 +10,7 @@ namespace PrimitiveSharp.Core
     {
         public static Image<Rgba32> LoadImage(string path)
         {
-            Image<Rgba32> image = Image.Load(path);
+            Image<Rgba32> image = (Image<Rgba32>)Image.Load(path);
             return image;
         }
 
