@@ -28,7 +28,7 @@ namespace PrimitiveSharp.Core
                     count++;
                 }
             }
-            if (count == 0) return Color.Black.ToPixel<Rgba32>(); //todo check
+            if (count == 0) return Color.Black;
 
             var r = ((int)(rsum / count) >> 8).Clamp(0, 255);
             var g = ((int)(gsum / count) >> 8).Clamp(0, 255);
