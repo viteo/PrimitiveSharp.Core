@@ -29,7 +29,6 @@ namespace PrimitiveSharp.Core
         private List<double> Scores { get; set; }
         private List<WorkerModel> Workers { get; set; }
 
-
         public RendererModel(Image<Rgba32> input, ParametersModel parameters)
         {
             input.Resize(parameters.CanvasResize);
@@ -69,6 +68,8 @@ namespace PrimitiveSharp.Core
                 Workers.Add(worker);
             }
         }
+
+        public RendererModel(byte[] inputImage, ParametersModel parameters) : this(Image.Load(inputImage), parameters) { }
 
         // run algorithm
         public void RunRenderer()
@@ -135,7 +136,7 @@ namespace PrimitiveSharp.Core
             StateModel bestState;
             results.TryTake(out bestState);
             double bestScore = bestState.Score();
-            
+
             foreach (var result in results)
             {
                 if (result.Score() < bestScore)
